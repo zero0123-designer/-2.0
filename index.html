@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<title>总裁模拟器 2.0 - 从摆摊到宇宙首富</title>
+<meta name="description" content="幽默搞笑的总裁模拟经营游戏 2.0：真实时间、名流通讯录、电话短信仿真、微博热搜、收购炒股、团队管理、危机公关、成就排行榜！"/>
+<style>
+  :root{
+    --gold:#f5c518; --gold2:#f0a020; --panel:#15151f;
+    --panel2:#1e1e2c; --line:#2a2a3a; --txt:#eaeaf0; --sub:#9a9ab0;
+    --green:#33d17a; --red:#ff5c5c; --blue:#4aa8ff; --purple:#b57bff;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(1200px 800px at 50% -10%,#1a1a28,#05050a 70%);
+    color:var(--txt);display:flex;align-items:center;justify-content:center;
+    min-height:100dvh;overflow:hidden;
+  }
+  #phone{position:relative;width:390px;max-width:100vw;height:844px;max-height:100dvh;background:#000;border-radius:44px;box-shadow:0 0 0 12px #14141c,0 30px 80px rgba(0,0,0,.7);overflow:hidden;display:flex;flex-direction:column}
+  @media(max-width:420px){#phone{border-radius:0;box-shadow:none;height:100dvh}}
+  #notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:150px;height:26px;background:#000;border-radius:16px;z-index:60}
+  #statusbar{height:44px;flex:0 0 44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:13px;color:#fff;font-weight:600;z-index:40}
+  #screen{flex:1;position:relative;overflow:hidden;background:linear-gradient(160deg,#101018,#05050a)}
+  .view{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:8px 14px 90px;display:none;animation:fade .25s}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  ::-webkit-scrollbar{width:0}
+
+  .hud{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,rgba(10,10,16,.96),rgba(10,10,16,.7));backdrop-filter:blur(8px);padding:6px 14px 10px;border-bottom:1px solid var(--line);margin:-8px -14px 10px}
+  .hud-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .nw{font-size:12px;color:var(--sub)}
+  .nw b{color:var(--gold);font-size:22px;display:block;line-height:1.1}
+  .title-sm{font-size:12px;color:var(--sub);text-align:right}
+  .title-sm b{color:var(--txt);font-size:14px;display:block}
+  .stats{display:flex;gap:6px;margin-top:8px}
+  .stat{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 8px;text-align:center}
+  .stat .lbl{font-size:10px;color:var(--sub)}
+  .stat .v{font-size:14px;font-weight:700;margin-top:1px}
+  .bar{height:5px;background:#2a2a3a;border-radius:3px;margin-top:4px;overflow:hidden}
+  .bar>i{display:block;height:100%;border-radius:3px;transition:width .4s}
+
+  .clock{text-align:center;color:#fff;margin:26px 0 20px}
+  .clock .t{font-size:60px;font-weight:200;letter-spacing:1px}
+  .clock .d{font-size:15px;color:#dedede;margin-top:2px}
+  .apps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 10px;padding:6px 4px}
+  .app{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;user-select:none}
+  .app .ic{width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 6px 16px rgba(0,0,0,.4);position:relative;transition:transform .1s}
+  .app:active .ic{transform:scale(.9)}
+  .app .nm{font-size:11px;color:#eee}
+  .badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;background:var(--red);border-radius:9px;font-size:11px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid #05050a}
+
+  h2.sec{font-size:16px;margin:6px 2px 10px;display:flex;align-items:center;gap:6px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+  .card h3{font-size:14px;margin-bottom:8px}
+  .muted{color:var(--sub);font-size:12px}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:700;cursor:pointer;background:linear-gradient(90deg,var(--gold),var(--gold2));color:#1a1200;transition:transform .1s,opacity .2s}
+  .btn:active{transform:scale(.96)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.ghost{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
+  .btn.red{background:linear-gradient(90deg,#ff6b6b,#e03b3b);color:#fff}
+  .btn.green{background:linear-gradient(90deg,#3ddc84,#22b06a);color:#04220f}
+  .btn.sm{padding:7px 11px;font-size:12px;border-radius:9px}
+  .btn.full{width:100%}
+  .tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;background:var(--panel2);border:1px solid var(--line);color:var(--sub)}
+  .pos{color:var(--green)} .neg{color:var(--red)}
+  .list-item{display:flex;gap:10px;align-items:center;padding:11px 12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer}
+  .avatar{width:44px;height:44px;border-radius:50%;flex:0 0 44px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--panel2)}
+  .li-main{flex:1;min-width:0}
+  .li-main .n{font-size:14px;font-weight:600}
+  .li-main .s{font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  #nav{position:absolute;bottom:0;left:0;right:0;height:78px;background:rgba(15,15,23,.92);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;z-index:30}
+  #nav button{flex:1;background:none;border:none;color:var(--sub);font-size:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding-bottom:12px;position:relative}
+  #nav button .ic{font-size:20px}
+  #nav button.on{color:var(--gold)}
+
+  #overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);z-index:80;display:none;align-items:center;justify-content:center;padding:22px}
+  #overlay.show{display:flex}
+  .modal{width:100%;max-width:340px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px;animation:pop .28s cubic-bezier(.2,.9,.3,1.3);max-height:88%;overflow-y:auto}
+  #overlay.chat-open{padding:0}
+  #overlay.chat-open .modal.chat-modal{width:100%;max-width:none;height:100%;max-height:none;border-radius:0;border:none;padding:14px 14px 18px;display:flex;flex-direction:column;overflow:hidden}
+  .chat-modal .chat-modal-body{flex:1;min-height:0;display:flex;flex-direction:column}
+  .chat-modal #chatWrap{flex:1;min-height:0;max-height:none!important;overflow-y:auto}
+  @keyframes pop{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+  .modal h3{font-size:17px;margin-bottom:6px}
+  .modal p{font-size:14px;color:var(--sub);line-height:1.55;margin-bottom:14px}
+  .choices{display:flex;flex-direction:column;gap:9px}
+  .choice{text-align:left;padding:12px 14px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;font-size:13px;cursor:pointer;color:var(--txt)}
+  .choice:hover{border-color:var(--gold)}
+
+  #call{position:absolute;inset:0;z-index:90;background:linear-gradient(180deg,#12303a,#05050a);display:none;flex-direction:column;align-items:center;padding:56px 24px 26px;text-align:center}
+  #call.show{display:flex}
+  #call .who{font-size:26px;font-weight:700}
+  #call .role{color:#bcd;margin-top:4px;font-size:13px}
+  #call .status{color:#8fb;margin-top:6px;font-size:13px}
+  #call .big{width:104px;height:104px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:52px;margin:20px auto}
+  #call.ringing .big{animation:ring 1s infinite}
+  @keyframes ring{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+  #callLog{flex:1;width:100%;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin:10px 0;text-align:left}
+  #callReply{width:100%}
+  .actions{display:flex;gap:50px;justify-content:center;margin-top:auto}
+  .call-btn{width:66px;height:66px;border-radius:50%;border:none;font-size:28px;cursor:pointer;color:#fff}
+  .call-btn.dec{background:#e03b3b} .call-btn.acc{background:#22b06a;animation:pulse 1.2s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,176,106,.6)}50%{box-shadow:0 0 0 16px rgba(34,176,106,0)}}
+  .call-btn.hang{background:#e03b3b;width:60px;height:60px;font-size:26px}
+
+  #toasts{position:absolute;top:52px;left:0;right:0;z-index:85;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+  .toast{background:rgba(20,20,30,.97);border:1px solid var(--line);border-radius:12px;padding:9px 14px;font-size:13px;max-width:90%;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:slidein .3s}
+  @keyframes slidein{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+
+  #start{position:absolute;inset:0;z-index:70;background:radial-gradient(600px 500px at 50% 20%,#20202e,#05050a);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px 30px;text-align:center;overflow-y:auto}
+  #start .logo{font-size:60px;margin-bottom:8px}
+  #start h1{font-size:28px;color:var(--gold);margin-bottom:4px}
+  #start .sub{color:var(--sub);font-size:13px;margin-bottom:22px}
+  #start input{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 15px;color:#fff;font-size:15px;margin-bottom:12px;text-align:center}
+  #start input:focus{outline:none;border-color:var(--gold)}
+  #start .lbl{font-size:12px;color:var(--sub);align-self:flex-start;margin:4px 0 6px}
+  .seg,.diff{display:flex;gap:8px;width:100%;margin-bottom:14px}
+  .diff button,.seg.pick button{flex:1;padding:10px 6px;border-radius:10px;background:var(--panel);border:1px solid var(--line);color:var(--sub);font-size:12px;cursor:pointer}
+  .diff button.on,.seg.pick button.on{border-color:var(--gold);color:var(--gold);background:var(--panel2)}
+
+  .chat-wrap{display:flex;flex-direction:column;gap:8px}
+  .msg-bubble{max-width:80%;padding:9px 12px;border-radius:14px;font-size:13px;line-height:1.45;word-break:break-word}
+  .msg-in{background:var(--panel2);border:1px solid var(--line);border-top-left-radius:4px;align-self:flex-start}
+  .msg-out{background:linear-gradient(90deg,var(--gold),var(--gold2));color:#1a1200;border-top-right-radius:4px;align-self:flex-end}
+  .quick{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 8px}
+  .quick button{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:16px;padding:6px 11px;font-size:12px;cursor:pointer}
+  .inbar{display:flex;gap:6px}
+  .inbar input{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;color:#fff;font-size:13px}
+  .inbar input:focus{outline:none;border-color:var(--gold)}
+
+  .center-empty{text-align:center;color:var(--sub);font-size:13px;padding:30px 20px}
+  .ach{display:flex;gap:10px;align-items:center;padding:11px;border-radius:12px;border:1px solid var(--line);margin-bottom:8px;background:var(--panel)}
+  .ach.locked{opacity:.45;filter:grayscale(1)}
+  .ach .ico{font-size:26px}
+  .price-up{color:var(--green)} .price-down{color:var(--red)}
+  .seg2{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:3px;margin-bottom:12px}
+  .seg2 button{flex:1;border:none;background:none;color:var(--sub);font-size:12px;padding:7px;border-radius:8px;cursor:pointer}
+  .seg2 button.on{background:var(--gold);color:#1a1200;font-weight:700}
+  textarea.wb{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:11px;color:#fff;font-size:14px;resize:none;min-height:70px}
+  textarea.wb:focus{outline:none;border-color:var(--gold)}
+  .imgbox{margin-top:8px;border-radius:12px;overflow:hidden;border:1px solid var(--line);height:120px;display:flex;align-items:center;justify-content:center;font-size:46px}
+  .imgpick{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .imgpick button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);font-size:22px;cursor:pointer}
+  .imgpick button.on{border-color:var(--gold)}
+  .wb-post{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .wb-post .n{font-weight:600;font-size:14px}
+  .wb-post .h{font-size:11px;color:var(--sub)}
+</style>
+</head>
+<body>
+<div id="phone">
+  <div id="notch"></div>
+  <div id="statusbar"><span id="sbTime">--:--</span><span>总裁 5G ●●●● 🔋</span></div>
+  <div id="screen">
+    <div id="start">
+      <div class="logo">💼</div>
+      <h1>总裁模拟器 2.0</h1>
+      <div class="sub">从摆摊小贩到宇宙首富的荒诞之路</div>
+      <div class="lbl">你的名号</div>
+      <input id="nameInput" maxlength="8" placeholder="给自己起个总裁名号"/>
+      <div class="lbl">性别</div>
+      <div class="seg pick" id="genderPick">
+        <button data-g="male" class="on">👨 男</button>
+        <button data-g="female">👩 女</button>
+        <button data-g="secret">🕶️ 保密</button>
+      </div>
+      <div class="lbl">开局难度</div>
+      <div class="diff">
+        <button data-d="easy">富二代<br><small>开局$500万</small></button>
+        <button data-d="normal" class="on">白手起家<br><small>开局$1万</small></button>
+        <button data-d="hard">负债狂魔<br><small>开局-$5万</small></button>
+      </div>
+      <button class="btn full" id="startBtn">开启总裁人生 🚀</button>
+      <button class="btn ghost full" id="continueBtn" style="margin-top:10px;display:none">继续上次存档</button>
+      <div class="muted" style="margin-top:14px">数据自动保存在本机浏览器 · 时间跟随现实</div>
+    </div>
+
+    <div class="view active" id="v-home">
+      <div class="clock">
+        <div class="t" id="homeClock">--:--</div>
+        <div class="d" id="homeDate">加载中…</div>
+      </div>
+      <div class="apps" id="appGrid"></div>
+    </div>
+
+    <div class="view" id="v-biz"></div>
+    <div class="view" id="v-market"></div>
+    <div class="view" id="v-team"></div>
+    <div class="view" id="v-shop"></div>
+    <div class="view" id="v-social"></div>
+    <div class="view" id="v-msg"></div>
+    <div class="view" id="v-phone"></div>
+    <div class="view" id="v-ach"></div>
+    <div class="view" id="v-settings"></div>
+    <div class="view" id="v-bank"></div>
+    <div class="view" id="v-entertainment"></div>
+    <div class="view" id="v-me"></div>
+  </div>
+
+  <div id="nav">
+    <button data-nav="v-home" class="on"><span class="ic">🏠</span>桌面</button>
+    <button data-nav="v-msg"><span class="ic">💬</span>信息</button>
+    <button data-nav="v-phone"><span class="ic">📞</span>电话</button>
+    <button data-nav="v-social"><span class="ic">🔥</span>热搜</button>
+    <button data-nav="v-me"><span class="ic">👤</span>我的</button>
+  </div>
+
+  <div id="toasts"></div>
+  <div id="overlay"><div class="modal" id="modal"></div></div>
+  <div id="call"></div>
+</div>
+
+<script>
+"use strict";
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const rand=(a,b)=>Math.random()*(b-a)+a;
+const randi=(a,b)=>Math.floor(rand(a,b+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const SAVE_KEY="ceo2_save_v2";
+const DAY_MS=86400000;
+
+function money(n){
+  const neg=n<0; n=Math.abs(n); let s;
+  if(n>=1e12) s="$"+(n/1e12).toFixed(2)+"万亿";
+  else if(n>=1e8) s="$"+(n/1e8).toFixed(2)+"亿";
+  else if(n>=1e4) s="$"+(n/1e4).toFixed(2)+"万";
+  else s="$"+Math.round(n).toLocaleString();
+  return (neg?"-":"")+s;
+}
+
+/* ===== CONTACTS （谐音名，非真人）===== */
+const CONTACTS=[
+  {id:"masi",name:"马思克",emoji:"🚀",cat:"tycoon",role:"火箭与电车狂人",
+    open:["喂{h}，我又想搞个新玩意儿，缺个有钱的合伙人！","{name}！火星的地我先给你留一块，回头一起去啊。","刚发射完火箭，顺手给你打个电话。"],
+    replies:["星辰大海，别怂！","钱嘛，不就是拿来烧的。","我睡工厂地板都比你努力😏","下周我们直接上火星开会。","这个想法很疯狂，我喜欢！"]},
+  {id:"beisuo",name:"贝所思",emoji:"📦",cat:"tycoon",role:"网购帝国创始人",
+    open:["{H}，我这物流网想铺到你那儿，谈谈？","今天又有几百万个包裹发出去了，爽。","{name}，考虑在我平台上开个旗舰店不？"],
+    replies:["规模就是一切。","客户第一，利润第二。","再便宜一点还能再多卖点。","我仓库比你家还大。","数据不会骗人。"]},
+  {id:"bajiu",name:"巴韭特",emoji:"👴",cat:"tycoon",role:"股神·滚雪球专家",
+    open:["年轻人，我看好你，给你个内幕消息。","别人贪婪我恐惧，最近你可得稳着点。","{name}，要不要跟我一起滚个雪球？"],
+    replies:["别亏钱，第一条就是别亏钱。","时间是好公司的朋友。","我从不买我看不懂的东西。","慢慢变富才是真的富。","可口的汉堡和便宜的股票我都爱。"]},
+  {id:"gaifan",name:"盖饭",emoji:"💻",cat:"tycoon",role:"软件首富·慈善家",
+    open:["{H}，一起做点慈善吧，名利双收。","我最近在研究怎么把钱花出去，难。","{name}，看看我这个新软件呗。"],
+    replies:["把窗户都装上我的系统。","做慈善比赚钱难多了。","读书吧，读书使人富有。","效率就是金钱。","我当年也是车库创业。"]},
+  {id:"mayun",name:"马芸",emoji:"😺",cat:"tycoon",role:"电商教父·前首富",
+    open:["{name}，我对钱没兴趣，但我对你的生意有兴趣。","今天我又去乡村小学看了看。","{h}，要不要来我这演讲一段？"],
+    replies:["今天很残酷，明天更残酷，后天很美好。","我从来没碰过钱。","梦想还是要有的。","员工离职无非两点：钱没给够，心委屈了。","小目标先定一个亿。"]},
+  {id:"huateng",name:"马化疼",emoji:"🐧",cat:"tycoon",role:"社交帝国掌门",
+    open:["{H}，加个好友呗，我给你发个红包。","我这游戏要不要给你留个首充？","{name}，你那生意能接我的社交入口。"],
+    replies:["用户体验最重要。","抄……啊不，是借鉴与创新。","流量在我手里。","一个亿的红包发下去了。","低调，低调。"]},
+  {id:"leijun",name:"雷君",emoji:"📱",cat:"tycoon",role:"性价比之王",
+    open:["Are you OK？{name}！","这个价格，交个朋友！","{h}，我新机发布会给你留了前排。"],
+    replies:["性价比！性价比！","为发烧而生。","这个真的可以有。","感动人心，价格厚道。","我们只赚一点点。"]},
+  {id:"dongzhu",name:"懂明珠",emoji:"❄️",cat:"tycoon",role:"空调女王",
+    open:["{H}，我的空调，你家该换了。","掌握核心科技，懂吗？","{name}，来给我直播间站个台。"],
+    replies:["核心科技必须自己造。","我从来不服输。","质量是企业的生命。","让世界爱上中国造。","我说的话，就是标准。"]},
+  {id:"wanglin",name:"王见林",emoji:"🏢",cat:"tycoon",role:"地产大亨",
+    open:["{name}，先定个小目标，挣它一个亿。","我这地皮，考虑一下？","{h}，清华北大不如胆子大。"],
+    replies:["先定个小目标。","清华北大不如胆子大。","有钱要低调。","跟着我有肉吃。","这栋楼我买了。"]},
+  {id:"sicong",name:"王思葱",emoji:"🐶",cat:"tycoon",role:"富二代",
+    open:["{h}，交朋友我只看有没有钱。","我给我狗又买了俩表。","{name}，一起吃个饭？我请，随便点。"],
+    replies:["我交朋友不管你有钱没钱，反正都没我有钱。","这点小钱无所谓。","开心最重要。","我狗过得都比你好😂","随便造，我买单。"]},
+  {id:"laoqian",name:"神秘老钱",emoji:"🎩",cat:"tycoon",role:"隐形富豪·家族掌门",
+    open:["{H}，我们家族俱乐部，考虑入会吗？","真正的财富，是看不见的。","{name}，有些机会，只给圈里人。"],
+    replies:["真正的有钱人从不露富。","财富要传承五代以上。","低调是最高级的奢华。","这事，我们私下谈。","圈子很重要。"]},
+  {id:"tuhao",name:"煤老板老赵",emoji:"⛏️",cat:"tycoon",role:"山西土豪",
+    open:["兄弟！走，晚上喝一个！","我又买了辆车，第九辆。","{name}，缺钱言语一声，哥有的是。"],
+    replies:["钱不是问题，问题是没钱🤣","走起，全都算我的！","低调低调，我就一挖煤的。","娃他妈又去买包了。","有啥事儿哥给你摆平。"]},
+  {id:"caixu",name:"蔡徐鲲",emoji:"🏀",cat:"star",role:"顶流爱豆",
+    open:["{h}，我新专辑想请你当出品人！","唱、跳、rap、篮球，你想听哪个？","{name}，粉丝们都想认识你。"],
+    replies:["感谢家人们的支持！","练习两年半的成果。","music~","下次一定给你打篮球看。","爱你们哟😘"]},
+  {id:"rebba",name:"迪丽热八",emoji:"💃",cat:"star",role:"当红女星",
+    open:["{H}，我新戏缺投资，帮衬一下？","刚杀青，好累但好开心。","{name}，红毯要不要一起走？"],
+    replies:["谢谢老板赏识～","演员就是要敬业。","这个角色我很喜欢。","改天请你喝奶茶🧋","么么哒。"]},
+  {id:"yiyang",name:"易烊千鸡",emoji:"🎤",cat:"star",role:"少年偶像",
+    open:["{h}好，我是个想好好演戏的年轻人。","刚结束一场舞台，来跟您聊聊。","{name}，有合适的剧本记得想着我。"],
+    replies:["我会继续努力的。","舞台是我的热爱。","谢谢前辈指点。","保持热爱，奔赴山海。","要脚踏实地。"]},
+  {id:"yangmi",name:"杨小蜜",emoji:"🌟",cat:"star",role:"带货女王",
+    open:["{H}！上链接吗？我帮你把货带爆！","家人们，今晚直播间不见不散。","{name}，这波合作稳赚。"],
+    replies:["所有女生，买它！","这个真的绝了！","库存不多了哦。","老板给我们申请个福利价！","下播啦，爱你们。"]},
+  {id:"mom",name:"老妈",emoji:"👩",cat:"family",role:"最牵挂你的人",
+    open:["{name}啊，多久没回家了？记得吃饭。","妈给你介绍个对象，人可好了。","天冷了，多穿点，别光顾着赚钱。"],
+    replies:["钱够花就行，别太累。","啥时候带对象回来看看？","妈给你留了饭。","别老熬夜。","我跟你爸都挺好的，你放心。"]},
+  {id:"dad",name:"老爸",emoji:"👨",cat:"family",role:"沉默的靠山",
+    open:["嗯，忙不忙？不忙就回家吃饭。","钱的事别硬扛，跟家里说。","{name}，做人要踏实。"],
+    replies:["嗯，知道了。","注意身体。","别乱花钱。","有事跟家里说。","你妈想你了。"]},
+  {id:"buddy",name:"发小阿强",emoji:"🧑",cat:"friend",role:"穿一条裤子长大的",
+    open:["兄弟！我有个稳赚不赔的项目，借点钱呗！","{name}！好久不聚了，出来喝一杯啊。","哥们儿最近手头有点紧……"],
+    replies:["够意思！我就知道你行。","改天请你搓一顿。","咱俩谁跟谁啊。","这事包在我身上。","有钱人就是不一样哈哈。"]},
+  {id:"roommate",name:"大学室友",emoji:"🛏️",cat:"friend",role:"当年下铺的兄弟",
+    open:["还记得当年一起吃泡面吗，现在你阔了！","{name}，同学会你可得来啊。","哥们儿想跳槽，给点建议？"],
+    replies:["士别三日刮目相看啊。","当年谁能想到你这么牛。","有机会带带兄弟。","下次聚会你买单哈。","保重身体，老同学。"]},
+  {id:"partner",name:"合伙人老王",emoji:"🤝",cat:"friend",role:"一起打江山的",
+    open:["{H}，公司有个大决策得你拍板。","这季度业绩出来了，来看看？","{name}，有个投资机会，要不要跟？"],
+    replies:["听你的，你是老大。","这事得慎重。","我这就去办。","咱们的目标是星辰大海。","账我都算好了。"]},
+  {id:"secretary",name:"秘书小美",emoji:"💁‍♀️",cat:"friend",role:"贴心助理",
+    open:["{H}，您的日程满了，要不要推掉几个？","有位大人物想约您见面。","{name}，您的咖啡好了。"],
+    replies:["好的，我马上安排。","已经帮您处理好了。","您还有个会议哦。","需要我帮您挡掉吗？","辛苦您了{H}。"]},
+];
+const cById=id=>CONTACTS.find(c=>c.id===id);
+
+const STOCKS=[
+  {id:"APPL",name:"苹裹科技",emoji:"🍎",price:180,vol:.06},
+  {id:"TSLZ",name:"特斯乐",emoji:"🚗",price:250,vol:.11},
+  {id:"MEME",name:"迷因狗币",emoji:"🐕",price:0.6,vol:.28},
+  {id:"OILX",name:"油腻石油",emoji:"🛢️",price:95,vol:.05},
+  {id:"AIGC",name:"人工智熊",emoji:"🤖",price:420,vol:.14},
+  {id:"BANK",name:"巨无霸银行",emoji:"🏦",price:60,vol:.03},
+  {id:"BUBB",name:"泡沫地产",emoji:"🏗️",price:33,vol:.16},
+];
+const ACQUIRE=[
+  {id:"cafe",name:"街角奶茶店",emoji:"🧋",price:80000,income:400,desc:"第一桶金从珍珠奶茶开始。"},
+  {id:"factory",name:"螺丝钉工厂",emoji:"🏭",price:600000,income:3200,desc:"制造业才是立国之本（狗头）。"},
+  {id:"app",name:"社交软件公司",emoji:"📱",price:3000000,income:18000,desc:"日活三个人，估值十个亿。"},
+  {id:"studio",name:"短剧影视公司",emoji:"🎬",price:12000000,income:70000,desc:"《总裁的108个替身》全网爆火。"},
+  {id:"chip",name:"芯片制造厂",emoji:"💾",price:80000000,income:450000,desc:"卡脖子？不存在的。"},
+  {id:"rocket",name:"民营火箭公司",emoji:"🚀",price:600000000,income:3200000,desc:"下一站，火星包邮区。"},
+  {id:"bank",name:"跨国银行集团",emoji:"🏦",price:5000000000,income:26000000,desc:"钱生钱，利滚利，你就是印钞机。"},
+];
+const STAFF_POOL=[
+  {role:"实习生小张",emoji:"🧑‍💻",cost:20000,salary:300,boost:"income",amt:0.05,desc:"996的形状，收入+5%"},
+  {role:"金牌销售Kevin",emoji:"🕴️",cost:120000,salary:1500,boost:"income",amt:0.12,desc:"能把梳子卖给和尚，收入+12%"},
+  {role:"公关总监Lisa",emoji:"💁‍♀️",cost:300000,salary:4000,boost:"rep",amt:8,desc:"危机公关一把好手，声望更稳"},
+  {role:"首席财务官",emoji:"🧮",cost:800000,salary:9000,boost:"income",amt:0.2,desc:"合理避税大师，收入+20%"},
+  {role:"网红代言人",emoji:"🤩",cost:1500000,salary:20000,boost:"fame",amt:15,desc:"自带流量，名气飙升"},
+  {role:"神秘军师",emoji:"🧙",cost:8000000,salary:80000,boost:"income",amt:0.4,desc:"运筹帷幄，收入+40%"},
+];
+const SHOP=[
+  {id:"iphone",name:"最新款手机",emoji:"📱",price:12000,mood:5,fame:1},
+  {id:"watch",name:"镶钻名表",emoji:"⌚",price:280000,mood:8,fame:3},
+  {id:"car",name:"跑车",emoji:"🏎️",price:2800000,mood:15,fame:8},
+  {id:"yacht",name:"豪华游艇",emoji:"🛥️",price:60000000,mood:25,fame:20},
+  {id:"jet",name:"私人飞机",emoji:"✈️",price:400000000,mood:35,fame:35},
+  {id:"island",name:"私人岛屿",emoji:"🏝️",price:2000000000,mood:50,fame:50},
+  {id:"rocket",name:"个人宇宙飞船",emoji:"🛸",price:30000000000,mood:80,fame:99,special:"star"},
+];
+const TITLES=[
+  {nw:0,t:"初出茅庐"},{nw:1e5,t:"小有身家"},{nw:1e6,t:"百万富翁"},
+  {nw:1e7,t:"千万俱乐部"},{nw:1e8,t:"亿万富豪"},{nw:1e9,t:"商业巨鳄"},
+  {nw:1e10,t:"行业教父"},{nw:1e11,t:"国民首富"},{nw:1e12,t:"宇宙首富👑"}
+];
+const ACHS=[
+  {id:"first_deal",ico:"🤝",name:"第一桶金",desc:"完成第一笔经营决策"},
+  {id:"stock_win",ico:"📈",name:"股神附体",desc:"单笔炒股盈利超$10万"},
+  {id:"first_company",ico:"🏢",name:"我有公司了",desc:"收购第一家公司"},
+  {id:"team5",ico:"👥",name:"团队初成",desc:"雇佣5名员工"},
+  {id:"buy_car",ico:"🏎️",name:"人生第一辆跑车",desc:"购买一辆跑车"},
+  {id:"buy_jet",ico:"✈️",name:"飞上天",desc:"购买私人飞机"},
+  {id:"call_star",ico:"⭐",name:"和名人通话",desc:"接听或拨打名人的电话"},
+  {id:"viral",ico:"🔥",name:"热搜第一",desc:"一条动态点赞破百万"},
+  {id:"crisis",ico:"🛡️",name:"公关危机化解者",desc:"成功化解一次危机"},
+  {id:"millionaire",ico:"💵",name:"百万富翁",desc:"净资产突破$100万"},
+  {id:"billionaire",ico:"💎",name:"十亿身家",desc:"净资产突破$10亿"},
+  {id:"richest",ico:"👑",name:"宇宙首富",desc:"净资产突破$1万亿"},
+];
+const QUICK_REPLIES=["哈哈您太客气了","这个我考虑一下","没问题，包在我身上！","改天一起吃个饭？","您说得对","我最近有点忙","行，听你的","让我想想再答复","必须支持！","下次细聊"];
+const IMG_OPTIONS=["🏝️","🏎️","🛥️","✈️","🍽️","🌆","💰","🥂","🏢","🐶","☕","💎"];
+
+let S=null, callState=null, activeChatId=null;
+let clockTimer=null, stockTimer=null, callTimer=null, smsTimer=null, eventTimer=null, regenAcc=0, recentRandomEvents=[];
+
+function newState(name,gender,diff){
+  const cash={easy:5000000,normal:10000,hard:-50000}[diff];
+  return {
+    name:name||"匿名总裁", gender:gender||"secret", diff,
+    startTime:Date.now(), lastSettledDay:1,
+    cash, mood:70, energy:100, health:80, reputation:50, fame:10,
+    companyName:"卑微创业公司", companyLevel:1, dailyIncome:200,
+    portfolio:{}, stockCost:{}, companies:{}, team:[], inventory:[],
+    achievements:[], titles:["初出茅庐"], activeTitle:"初出茅庐",
+    chats:{}, social:[], log:[], decisionsMade:0,
+    settings:{callSec:10, smsSec:5, notify:true, doNotDisturb:false, randomEventSec:10},
+    flags:{}
+  };
+}
+
+function playerAvatar(){return {male:"🤵",female:"👩‍💼",secret:"🧑‍💼"}[S.gender]||"🧑‍💼";}
+function honor(){return {male:"先生",female:"女士",secret:"老板"}[S.gender]||"老板";}
+function bro(){return {male:"哥",female:"姐",secret:"老板"}[S.gender]||"老板";}
+function vars(str){return String(str).replace(/\{H\}/g,honor()).replace(/\{h\}/g,bro()).replace(/\{name\}/g,S.name);}
+
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}}
+function load(){try{return JSON.parse(localStorage.getItem(SAVE_KEY));}catch(e){return null;}}
+function normalizeLoadedState(saved){
+  const base=newState(saved?.name,saved?.gender,saved?.diff||"normal");
+  S=Object.assign(base,saved||{});
+  S.portfolio=S.portfolio&&typeof S.portfolio==="object"?S.portfolio:{};
+  S.stockCost=S.stockCost&&typeof S.stockCost==="object"?S.stockCost:{};
+  S.companies=S.companies&&typeof S.companies==="object"?S.companies:{};
+  S.team=Array.isArray(S.team)?S.team:[];
+  S.inventory=Array.isArray(S.inventory)?S.inventory:[];
+  S.achievements=Array.isArray(S.achievements)?S.achievements:[];
+  S.titles=Array.isArray(S.titles)&&S.titles.length?S.titles:["初出茅庐"];
+  S.chats=S.chats&&typeof S.chats==="object"?S.chats:{};
+  S.social=Array.isArray(S.social)?S.social:[];
+  S.log=Array.isArray(S.log)?S.log:[];
+  S.flags=S.flags&&typeof S.flags==="object"?S.flags:{};
+  S.settings=Object.assign({callSec:10,smsSec:5,notify:true,doNotDisturb:false},S.settings||{});
+  if(!BANK_CARDS.find(c=>c.id===S.flags.bankCard))S.flags.bankCard="black";
+  // 兼容旧存档：旧版本若已有持仓但没有成本记录，则以载入时价格建立成本基准，避免出现 NaN。
+  STOCKS.forEach(st=>{
+    const held=Number(S.portfolio[st.id]||0);
+    if(held>0 && (!Number.isFinite(Number(S.stockCost[st.id])) || Number(S.stockCost[st.id])<=0)){
+      S.stockCost[st.id]=+(held*st.price).toFixed(2);
+    }
+    if(held<=0){
+      delete S.portfolio[st.id];
+      delete S.stockCost[st.id];
+    }
+  });
+  save();
+  return S;
+}
+
+function currentDay(){return Math.floor((Date.now()-S.startTime)/DAY_MS)+1;}
+function fmtRealTime(){const d=new Date();return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
+function fmtRealDate(){const d=new Date();const wd=["星期日","星期一","星期二","星期三","星期四","星期五","星期六"][d.getDay()];return `${d.getMonth()+1}月${d.getDate()}日 · ${wd} · 第${currentDay()}天`;}
+function settleDays(){
+  const d=currentDay();
+  if(d>S.lastSettledDay){
+    const days=d-S.lastSettledDay;
+    const inc=passiveIncome(), sal=S.team.reduce((a,t)=>a+t.salary,0);
+    S.cash+=(inc-sal)*days;
+    let repB=0,fameB=0;S.team.forEach(t=>{if(t.boost==="rep")repB+=t.amt;if(t.boost==="fame")fameB+=t.amt;});
+    S.reputation+=Math.round(repB/3*days);S.fame+=Math.round(fameB/3*days);
+    S.lastSettledDay=d;
+    checkTitle();checkAchievements();save();
+    toast(`📅 过去 ${days} 天累计入账<br><small class='pos'>+${money((inc-sal)*days)}</small>`,3600);
+  }
+}
+
+function netWorth(){
+  let n=S.cash;
+  for(const id in S.portfolio){const st=STOCKS.find(x=>x.id===id);if(st)n+=st.price*S.portfolio[id];}
+  ACQUIRE.forEach(c=>{if(S.companies[c.id])n+=c.price;});
+  SHOP.forEach(it=>{if(S.inventory.includes(it.id))n+=it.price*0.5;});
+  return n;
+}
+function passiveIncome(){
+  let inc=S.dailyIncome;
+  ACQUIRE.forEach(c=>{if(S.companies[c.id])inc+=c.income;});
+  let mult=1;S.team.forEach(t=>{if(t.boost==="income")mult+=t.amt;});
+  return Math.round(inc*mult);
+}
+
+function toast(msg,ms=2600){
+  const t=document.createElement("div");t.className="toast";t.innerHTML=msg;
+  $("#toasts").appendChild(t);
+  setTimeout(()=>{t.style.opacity=0;t.style.transition="opacity .4s";setTimeout(()=>t.remove(),400);},ms);
+}
+function logEvent(txt){S.log.unshift({d:currentDay(),txt});if(S.log.length>60)S.log.pop();}
+
+function delta(obj){
+  let parts=[];
+  for(const k in obj){
+    const v=obj[k];
+    if(k==="cash"){S.cash+=v;parts.push((v>=0?"+":"")+money(v));}
+    else if(k in S){
+      if(["mood","energy","health"].includes(k))S[k]=clamp(S[k]+v,0,100);
+      else S[k]=Math.max(0,S[k]+v);
+      const label={mood:"心情",energy:"精力",health:"健康",reputation:"声望",fame:"名气"}[k]||k;
+      if(v)parts.push(label+(v>=0?" +":" ")+v);
+    }
+  }
+  checkTitle();checkAchievements();refreshHUD();save();
+  return parts.join("  ");
+}
+
+function checkTitle(){
+  const nw=netWorth();let best=TITLES[0].t;
+  TITLES.forEach(x=>{if(nw>=x.nw)best=x.t;});
+  if(!S.titles.includes(best)){S.titles.push(best);S.activeTitle=best;toast("🎖️ 解锁新称号：<b>"+best+"</b>");}
+}
+function unlock(id){
+  if(S.achievements.includes(id))return;
+  const a=ACHS.find(x=>x.id===id);if(!a)return;
+  S.achievements.push(id);toast("🏆 成就达成：<b>"+a.name+"</b>");logEvent("解锁成就「"+a.name+"」");
+}
+function checkAchievements(){
+  const nw=netWorth();
+  if(nw>=1e6)unlock("millionaire");
+  if(nw>=1e9)unlock("billionaire");
+  if(nw>=1e12)unlock("richest");
+  if(S.team.length>=5)unlock("team5");
+  if(Object.values(S.companies).some(Boolean))unlock("first_company");
+}
+
+function moodColor(v){return v>66?"var(--green)":v>33?"var(--gold)":"var(--red)";}
+function refreshHUD(){
+  $("#sbTime").textContent=fmtRealTime();
+  $("#homeClock").textContent=fmtRealTime();
+  $("#homeDate").textContent=fmtRealDate();
+  updateBadges();
+}
+function hudBar(){
+  const nw=netWorth();
+  return `<div class="hud">
+    <div class="hud-top">
+      <div class="nw">💰 总资产<b>${money(nw)}</b></div>
+      <div class="title-sm">${esc(S.name)} · Lv.${S.companyLevel}<b>🎖️ ${S.activeTitle}</b></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="lbl">💰可用资产</div><div class="v" style="color:${S.cash<0?'var(--red)':'var(--gold)'}">${money(S.cash)}</div></div>
+      <div class="stat"><div class="lbl">😀心情</div><div class="v">${S.mood}</div><div class="bar"><i style="width:${S.mood}%;background:${moodColor(S.mood)}"></i></div></div>
+      <div class="stat"><div class="lbl">⚡精力</div><div class="v">${S.energy}</div><div class="bar"><i style="width:${S.energy}%;background:${moodColor(S.energy)}"></i></div></div>
+      <div class="stat"><div class="lbl">⭐声望</div><div class="v">${S.reputation}</div><div class="bar"><i style="width:${clamp(S.reputation,0,100)}%;background:var(--blue)"></i></div></div>
+    </div>
+  </div>`;
+}
+
+function switchView(id){
+  $$(".view").forEach(v=>v.classList.toggle("active",v.id===id));
+  $$("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.nav===id));
+  render(id);$("#screen").scrollTop=0;const v=$("#"+id);if(v)v.scrollTop=0;
+}
+function render(id){
+  ({"v-biz":renderBiz,"v-market":renderMarket,"v-team":renderTeam,"v-shop":renderShop,
+    "v-social":renderSocial,"v-msg":renderMsg,"v-phone":renderPhone,"v-ach":renderAch,
+    "v-settings":renderSettings,"v-bank":renderBank,"v-entertainment":renderEntertainment,"v-me":renderMe,"v-home":renderHome}[id]||(()=>{}))();
+}
+
+function renderHome(){
+  const apps=[
+    {v:"v-biz",ic:"🏢",nm:"经营",bg:"linear-gradient(135deg,#4aa8ff,#2b6fd1)"},
+    {v:"v-market",ic:"📈",nm:"股市",bg:"linear-gradient(135deg,#33d17a,#1f9e5a)"},
+    {v:"v-market",ic:"🏢",nm:"收购",bg:"linear-gradient(135deg,#b57bff,#7c3fd1)",tab:"acquire"},
+    {v:"v-team",ic:"👥",nm:"团队",bg:"linear-gradient(135deg,#ff9f43,#e07b1a)"},
+    {v:"v-shop",ic:"🛍️",nm:"购物",bg:"linear-gradient(135deg,#ff6b9d,#d13b6f)"},
+    {v:"v-social",ic:"🔥",nm:"热搜",bg:"linear-gradient(135deg,#ff5c5c,#c93030)",badge:"social"},
+    {v:"v-msg",ic:"💬",nm:"信息",bg:"linear-gradient(135deg,#33c9d1,#1f9ea5)",badge:"msg"},
+    {v:"v-phone",ic:"📞",nm:"电话",bg:"linear-gradient(135deg,#3ddc84,#1f9e5a)"},
+    {v:"v-ach",ic:"🏆",nm:"成就",bg:"linear-gradient(135deg,#f5c518,#d19b0e)"},
+    {v:"v-bank",ic:"💳",nm:"银行卡",bg:"linear-gradient(135deg,#20242e,#0b0d12)"},
+    {v:"v-entertainment",ic:"🎮",nm:"娱乐",bg:"linear-gradient(135deg,#9b6cff,#5d32c7)"},
+    {v:"v-settings",ic:"⚙️",nm:"设置",bg:"linear-gradient(135deg,#8a8a9a,#5a5a6a)"},
+    {v:"v-me",ic:"👤",nm:"我的",bg:"linear-gradient(135deg,#6a6a7a,#3a3a4a)"},
+  ];
+  $("#appGrid").innerHTML=apps.map(a=>`
+    <div class="app" data-app="${a.v}" ${a.tab?`data-tab="${a.tab}"`:""}>
+      <div class="ic" style="background:${a.bg}">${a.ic}${a.badge?`<span class="badge" data-badge="${a.badge}" style="display:none"></span>`:""}</div>
+      <div class="nm">${a.nm}</div>
+    </div>`).join("");
+  $$("#appGrid .app").forEach(el=>el.onclick=()=>{
+    const t=el.dataset.app;
+    if(el.dataset.tab)marketTab=el.dataset.tab;
+    switchView(t);
+  });
+  updateBadges();
+}
+function updateBadges(){
+  const unread=Object.values(S.chats).reduce((a,c)=>a+c.filter(m=>m.unread).length,0);
+  $$("[data-badge='msg']").forEach(b=>{b.style.display=unread?"flex":"none";b.textContent=unread;});
+}
+const BANK_CARDS=[
+  {id:"black",n:"黑曜至尊黑卡",icon:"🖤",desc:"全球顶级礼遇 · 私人银行级服务",benefit:"娱乐奖金 +5% · 声望+1",entertainmentBonus:.05},
+  {id:"platinum",n:"无限白金卡",icon:"💎",desc:"无限额度 · 全球机场贵宾厅",benefit:"摸鱼休息额外恢复精力 +5",restBonus:5},
+  {id:"diamond",n:"钻石典藏卡",icon:"💠",desc:"高净值专属 · 豪华生活权益",benefit:"娱乐小游戏奖金 +10%",entertainmentBonus:.10},
+  {id:"cosmic",n:"宇宙首富卡",icon:"👑",desc:"仅供传奇总裁持有",benefit:"娱乐小游戏奖金 +20% · 心情+2",entertainmentBonus:.20}
+];
+
+function activeBankCard(){
+  const id=S.flags.bankCard||"black";
+  return BANK_CARDS.find(c=>c.id===id)||BANK_CARDS[0];
+}
+function entertainmentMultiplier(){
+  return 1+(activeBankCard().entertainmentBonus||0);
+}
+function entertainmentReward(v){
+  return Math.round(v*entertainmentMultiplier());
+}
+
+function renderBank(){
+  const active=activeBankCard();
+  $("#v-bank").innerHTML=hudBar()+`<h2 class="sec">💳 银行卡</h2>
+    <div class="card" style="background:linear-gradient(135deg,#191923,#0d0d13)">
+      <div class="muted">当前主卡</div>
+      <div style="font-size:22px;font-weight:800;margin-top:4px">${active.icon} ${esc(active.n)}</div>
+      <div class="muted" style="margin-top:7px">所有银行卡都可以随时切换，主卡效果会立即生效。</div>
+    </div>
+    ${BANK_CARDS.map(c=>`<div class="card" style="background:linear-gradient(135deg,#171722,#0d0d14)">
+      <div class="row">
+        <div>
+          <div style="font-size:18px;font-weight:800">${c.icon} ${c.n}</div>
+          <div class="muted" style="margin-top:5px">${c.desc}</div>
+        </div>
+        <span class="tag">${active.id===c.id?"主卡":"可切换"}</span>
+      </div>
+      <div class="muted" style="margin:10px 0">✨ ${c.benefit}</div>
+      <button class="btn sm ${active.id===c.id?'ghost':''}" data-card="${c.id}" ${active.id===c.id?'disabled':''}>
+        ${active.id===c.id?'当前使用':'设为主卡'}
+      </button>
+    </div>`).join("")}`;
+  $$("[data-card]").forEach(b=>b.onclick=()=>{
+    S.flags.bankCard=b.dataset.card;
+    save();
+    toast("💳 已切换主卡：「"+activeBankCard().n+"」");
+    renderBank();
+  });
+}
+
+function renderEntertainment(){
+  const card=activeBankCard();
+  const bonus=Math.round((entertainmentMultiplier()-1)*100);
+  $("#v-entertainment").innerHTML=hudBar()+`<h2 class="sec">🎮 娱乐</h2>
+    <div class="card">
+      <div class="row"><span class="muted">当前主卡</span><b>${card.icon} ${esc(card.n)}</b></div>
+      <div class="muted" style="margin-top:6px">当前娱乐奖金加成：<b class="pos">+${bonus}%</b>${card.restBonus?` · 摸鱼额外精力 +${card.restBonus}`:""}</div>
+    </div>
+    <div class="card">
+      <h3>📈 猜涨跌</h3>
+      <p class="muted">花 5 点精力，猜下一次股市波动方向。猜中赚钱，猜错会损失一小部分本金。</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn green" id="guessUp" style="flex:1">📈 看涨</button>
+        <button class="btn red" id="guessDown" style="flex:1">📉 看跌</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>🧠 投资眼光</h3>
+      <p class="muted">从三个项目里选出近期最有潜力的一家，选对可以获得现金和声望。</p>
+      <button class="btn full" id="investGame">开始挑战</button>
+    </div>
+    <div class="card">
+      <h3>🤝 商业谈判</h3>
+      <p class="muted">面对不同商业场景选择谈判策略，不同选择会带来不同结果。</p>
+      <button class="btn full" id="dealGame">开始谈判</button>
+    </div>
+    <div class="card">
+      <h3>🛋️ 摸鱼休息</h3>
+      <p class="muted">什么都不做，休息一下。恢复 25 点精力和 6 点心情${card.restBonus?`，当前主卡额外恢复 ${card.restBonus} 点精力`:""}。</p>
+      <button class="btn ghost full" id="restGame" ${S.energy>=100?'disabled':''}>休息一下</button>
+    </div>`;
+
+  const spendEnergy=(n)=>{
+    if(S.energy<n){toast("⚡ 精力不足，先去摸鱼休息一下");return false;}
+    S.energy=clamp(S.energy-n,0,100);
+    return true;
+  };
+
+  $("#guessUp").onclick=()=>guess('up');
+  $("#guessDown").onclick=()=>guess('down');
+  const guess=dir=>{
+    if(!spendEnergy(5))return;
+    const up=Math.random()<.5;
+    const win=(dir==='up')===up;
+    const reward=entertainmentReward(randi(3000,12000));
+    if(win){
+      delta({cash:reward,reputation:1,mood:3});
+      toast("🎯 猜对了！ +"+money(reward));
+    }else{
+      const loss=Math.round(reward*.35);
+      delta({cash:-loss,mood:-2});
+      toast("📉 猜错了，损失 "+money(loss));
+    }
+    logEvent("娱乐·猜涨跌 → "+(win?"猜中":"猜错"));
+    save();renderEntertainment();
+  };
+
+  $("#investGame").onclick=()=>{
+    if(!spendEnergy(8))return;
+    const opts=["AI医疗平台","新能源电池厂","太空旅游公司"];
+    const answer=randi(0,2);
+    openModal({
+      title:"🧠 投资眼光",
+      body:"市场传闻只有一家会在近期爆发，你押哪家？",
+      choices:opts.map((x,i)=>({label:x,onClick:()=>{
+        if(i===answer){
+          const r=entertainmentReward(randi(12000,50000));
+          delta({cash:r,reputation:4,mood:5});
+          toast("💰 眼光毒辣！ +"+money(r));
+          logEvent("娱乐·投资眼光 → 选对");
+        }else{
+          const loss=randi(3000,15000);
+          delta({cash:-loss,mood:-3});
+          toast("📉 看错了，亏了 "+money(loss));
+          logEvent("娱乐·投资眼光 → 选错");
+        }
+        closeModal();renderEntertainment();
+      }}))
+    });
+  };
+
+  $("#dealGame").onclick=()=>{
+    if(!spendEnergy(6))return;
+    const d=pick([
+      {q:"客户要求降价 20%，否则换供应商。",a:[
+        {t:"坚持价格",e:{cash:18000,reputation:3},m:"客户最终接受了你的专业价值。"},
+        {t:"直接打八折",e:{cash:-12000,mood:4},m:"订单保住了，但利润缩水。"},
+        {t:"送增值服务",e:{cash:8000,reputation:6},m:"客户被你的诚意打动，签了长期合同。"}]},
+      {q:"竞争对手邀请你联合投标。",a:[
+        {t:"合作拿下",e:{cash:45000,reputation:5},m:"强强联手，订单顺利拿下。"},
+        {t:"独自竞标",e:{cash:randi(-20000,70000)},m:"你单枪匹马，结果有惊有喜。"},
+        {t:"故意抬价",e:{cash:-15000,reputation:-5},m:"玩砸了，行业口碑受损。"}]}
+    ]);
+    openModal({title:"🤝 商业谈判",body:d.q,choices:d.a.map(o=>({label:o.t,onClick:()=>{
+      const scaled={...o.e};
+      if(Number.isFinite(scaled.cash) && scaled.cash>0)scaled.cash=entertainmentReward(scaled.cash);
+      const r=delta(scaled);
+      toast(o.m+(r?"<br><small>"+r+"</small>":""));
+      logEvent("娱乐·商业谈判 → "+o.t);
+      closeModal();renderEntertainment();
+    }}))});
+  };
+
+  $("#restGame").onclick=()=>{
+    const extra=card.restBonus||0;
+    delta({energy:25+extra,mood:6});
+    toast("🛋️ 舒服地休息了一会儿，精力+"+(25+extra));
+    logEvent("娱乐·摸鱼休息");
+    renderEntertainment();
+  };
+}
+
+function renderBiz(){
+  const inc=passiveIncome();
+  $("#v-biz").innerHTML=hudBar()+`
+    <h2 class="sec">🏢 公司经营</h2>
+    <div class="card">
+      <div class="row"><h3>${esc(S.companyName)}</h3><span class="tag">Lv.${S.companyLevel}</span></div>
+      <div class="muted" style="margin:6px 0">每日被动收入：<b class="pos">${money(inc)}</b> /天（按真实天数结算）</div>
+      <div class="row">
+        <button class="btn sm" id="renameBtn">改公司名</button>
+        <button class="btn sm green" id="upgradeBtn">升级公司 (${money(upgradeCost())})</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row"><h3>💡 经营决策</h3><span class="tag">已做 ${S.decisionsMade} 次</span></div>
+      <p class="muted">每次决策消耗精力，可能改变命运。精力会随时间恢复，也可以前往“娱乐”里的“摸鱼休息”。</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn" id="decisionBtn" style="flex:1" ${S.energy<10?"disabled":""}>${S.energy<10?"精力不足":"💡 商业决策 (⚡-10)"}</button>
+        <button class="btn ghost" id="randomEventBtn" style="flex:1">🎲 随机事件</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row"><h3>🎲 随机事件</h3><span class="tag">自动弹出</span></div>
+      <p class="muted">经营过程中会随机遇到商业机会、突发危机、人际关系和生活事件。每次事件都会从大量事件池中随机抽取，并尽量避免连续重复。</p>
+      <button class="btn ghost full" id="randomEventBtn2">现在触发一次随机事件</button>
+    </div>
+    <div class="card">
+      <h3>📜 经营日志</h3>
+      ${S.log.length?S.log.slice(0,12).map(l=>`<div class="muted" style="padding:4px 0;border-bottom:1px solid var(--line)">第${l.d}天 · ${esc(l.txt)}</div>`).join(""):'<div class="center-empty">还没有任何记录</div>'}
+    </div>`;
+  $("#renameBtn").onclick=()=>{const n=prompt("给公司起个响亮的名字：",S.companyName);if(n){S.companyName=n.slice(0,12);renderBiz();save();}};
+  $("#upgradeBtn").onclick=upgradeCompany;
+  $("#decisionBtn").onclick=doDecision;
+  $("#randomEventBtn").onclick=()=>randomEvent(true);
+  $("#randomEventBtn2").onclick=()=>randomEvent(true);
+}
+function upgradeCost(){return Math.round(50000*Math.pow(2.4,S.companyLevel-1));}
+function upgradeCompany(){
+  const c=upgradeCost();
+  if(S.cash<c)return toast("💸 现金不足，差 "+money(c-S.cash));
+  S.cash-=c;S.companyLevel++;S.dailyIncome=Math.round(S.dailyIncome*1.8+200);
+  const names=["卑微创业公司","小有名气工作室","区域龙头企业","全国连锁集团","跨国控股集团","行业垄断帝国","宇宙商业帝国"];
+  S.companyName=names[Math.min(S.companyLevel-1,names.length-1)];
+  toast("🎉 公司升级到 Lv."+S.companyLevel+"！");logEvent("公司升级到 Lv."+S.companyLevel);delta({});renderBiz();
+}
+const DECISIONS=[
+  {q:"供应商送来一批'尾货'，价格便宜一半，但质量存疑。要进货吗？",
+   a:[{t:"进！利润至上",e:{cash:80000,reputation:-8,mood:5},m:"赚是赚了，但客户开始投诉…"},
+      {t:"拒绝，我要口碑",e:{cash:-5000,reputation:6},m:"少赚点，但顾客信任你了。"}]},
+  {q:"员工提出要涨薪，否则集体跳槽。",
+   a:[{t:"加薪安抚",e:{cash:-30000,mood:5,reputation:4},m:"团队士气大振！"},
+      {t:"画饼：期权走起",e:{reputation:-5,mood:-3},m:"有人信了，有人跑了。"},
+      {t:"直接开除闹事者",e:{cash:10000,reputation:-10,mood:-5},m:"杀鸡儆猴，但风评被害。"}]},
+  {q:"一个网红想带货你的产品，要50万坑位费。",
+   a:[{t:"砸钱投放",e:{cash:-500000,fame:12,reputation:3},m:"直播间挤爆了！"},
+      {t:"太贵了，不投",e:{fame:-2},m:"错过一波流量，但省了钱。"}]},
+  {q:"发现竞争对手财务造假，你手握实锤。",
+   a:[{t:"匿名举报",e:{reputation:10,fame:8},m:"你成了行业清流！"},
+      {t:"私下要挟分钱",e:{cash:2000000,reputation:-15},m:"钱到手了，但你睡不着觉。"}]},
+  {q:"公司现金流紧张，银行催贷。",
+   a:[{t:"变卖部分资产",e:{cash:200000,mood:-6},m:"割肉止血，勉强撑住。"},
+      {t:"再借一笔高利贷",e:{cash:500000,reputation:-6,mood:-4},m:"饮鸩止渴，利滚利…"}]},
+  {q:"有机会赞助一档爆火综艺，冠名费不菲。",
+   a:[{t:"豪掷冠名",e:{cash:-1000000,fame:20,reputation:5},m:"全国都知道你的品牌了！"},
+      {t:"低调发育",e:{},m:"钱包保住了，热度让给别人。"}]},
+  {q:"下属汇报：某项目严重超支，是否继续？",
+   a:[{t:"及时止损",e:{cash:-50000,mood:-3,reputation:2},m:"壮士断腕，明智。"},
+      {t:"梭哈到底",e:{cash:randi(-800000,1500000),mood:-5},m:"要么暴富要么暴负！"}]},
+];
+
+const RANDOM_EVENTS=[
+ {q:"你在机场候机时遇到一位神秘投资人，他提出一起投一个AI项目。",a:[{t:"投入$20,000试试",e:{cash:50000,reputation:2},m:"项目意外爆发，拿到了一笔漂亮的回报。"},{t:"谨慎旁观",e:{mood:2},m:"你没有冒险，但也没有损失。"},{t:"砍价后投入$5,000",e:{cash:randi(-10000,80000),reputation:1},m:"小额下注，结果令人意外。"}]},
+ {q:"你的公司突然收到一笔匿名转账，附言：‘感谢当年的帮助。’",a:[{t:"收下",e:{cash:30000,mood:5},m:"这笔钱来得莫名其妙，但确实到账了。"},{t:"原路退回",e:{reputation:8,mood:3},m:"你选择了诚信，声誉上涨。"},{t:"查清来源",e:{energy:-12,reputation:5},m:"查了一晚上资料，终于确认没有风险。"}]},
+ {q:"一位老员工发现了一个能节省公司成本的小窍门。",a:[{t:"奖励员工",e:{cash:-10000,reputation:6,mood:5},m:"团队士气高涨，大家开始主动找办法省钱。"},{t:"自己独享成果",e:{cash:25000,reputation:-8,mood:-3},m:"短期省了钱，但员工有点寒心。"},{t:"推广到全公司",e:{cash:60000,energy:-10},m:"降本增效成功，利润明显提升。"}]},
+ {q:"热门综艺邀请你做一期‘亿万富豪的一天’，但需要自掏宣传费。",a:[{t:"花$30,000上节目",e:{cash:-30000,fame:15,reputation:5,mood:8},m:"节目播出后，你突然成了热搜人物。"},{t:"拒绝曝光",e:{reputation:2,mood:3},m:"低调也是一种奢华。"},{t:"让公司买单",e:{cash:-5000,fame:8},m:"公司宣传预算帮你承担了一部分。"}]},
+ {q:"你在餐厅听到有人讨论一家冷门公司的内部消息。",a:[{t:"立即买入相关股票",e:{cash:randi(-30000,120000),mood:2},m:"你赌了一把，结果完全超出预期。"},{t:"不碰内幕消息",e:{reputation:6},m:"你选择远离风险，睡得很安心。"},{t:"只做小额试探",e:{cash:randi(-5000,30000),reputation:1},m:"小试牛刀，收益不算惊人。"}]},
+ {q:"秘书发现你的办公室咖啡机坏了，今天全公司都没精神。",a:[{t:"买新的",e:{cash:-8000,energy:15,mood:8},m:"全员恢复精神，办公室又活了。"},{t:"今天就这样吧",e:{energy:-8,mood:-3},m:"大家昏昏欲睡，效率下降。"},{t:"举办下午茶",e:{cash:-18000,energy:25,mood:12,reputation:2},m:"下午茶大成功，团队状态拉满。"}]},
+ {q:"你收到一个创业比赛邀请，冠军奖金很高，但要耗费一天精力准备。",a:[{t:"认真参赛",e:{cash:randi(20000,150000),energy:-30,fame:8},m:"你的商业计划惊艳全场。"},{t:"随便参加",e:{cash:randi(-5000,30000),energy:-10,fame:2},m:"重在参与，结果还不错。"},{t:"直接不去",e:{mood:3},m:"你决定把时间留给自己的事业。"}]},
+ {q:"一位富豪朋友送来一张高端私人会所会员卡。",a:[{t:"欣然接受",e:{mood:10,reputation:4},m:"你获得了进入顶级圈层的资格。"},{t:"转送给员工",e:{reputation:10,mood:5},m:"员工们对你刮目相看。"},{t:"出售会员资格",e:{cash:25000,reputation:-3},m:"会员卡变成了真金白银。"}]},
+ {q:"竞争对手突然宣布降价30%，你的核心产品也被卷进价格战。",a:[{t:"跟着降价",e:{cash:-40000,fame:6},m:"销量上涨，但利润被压得很薄。"},{t:"坚持品质不降价",e:{reputation:8,mood:2},m:"部分客户流失，但品牌形象更加稳固。"},{t:"推出限时套餐",e:{cash:65000,fame:4,reputation:2},m:"你用套餐避开了正面价格战。"}]},
+ {q:"公司服务器突然宕机，大量客户正在等待恢复。",a:[{t:"紧急请专家",e:{cash:-25000,reputation:8},m:"专家迅速修复，客户对你的处理速度很满意。"},{t:"让员工自己排查",e:{cash:randi(-30000,40000),energy:-15},m:"最终修好了，但过程一波三折。"},{t:"公开道歉并赔偿",e:{cash:-50000,reputation:12,fame:3},m:"你承担责任，反而赢得了信任。"}]},
+ {q:"一位年轻创业者拿着商业计划来找你，希望获得天使投资。",a:[{t:"投资$50,000",e:{cash:randi(-20000,180000),reputation:3},m:"年轻人的项目给了你一个惊喜。"},{t:"给他一些建议",e:{reputation:6,mood:3},m:"你没有投资，但给出的建议让他受益匪浅。"},{t:"直接拒绝",e:{mood:-2},m:"商场没有那么多机会，你选择谨慎。"}]},
+ {q:"你的品牌被网友误解，相关话题突然冲上热搜。",a:[{t:"立即回应",e:{reputation:8,fame:10,mood:-2},m:"及时回应扭转了舆论，热搜反而帮你宣传。"},{t:"保持沉默",e:{reputation:randi(-8,3),fame:5},m:"热度慢慢过去，但评价褒贬不一。"},{t:"请公关团队处理",e:{cash:-20000,reputation:12,fame:6},m:"专业公关出手，危机迅速降温。"}]},
+ {q:"某地突发暴雨，你旗下门店受灾，当地居民急需物资。",a:[{t:"捐赠物资",e:{cash:-30000,reputation:15,fame:5},m:"你帮助了不少居民，公司口碑明显提升。"},{t:"先保护资产",e:{cash:-5000,mood:-2},m:"你优先保住了公司，但心里有些不是滋味。"},{t:"联合其他企业援助",e:{cash:-15000,reputation:20,fame:8},m:"多家企业一起行动，效果远超预期。"}]},
+ {q:"一位老客户突然宣布要把年度订单全部交给你，但要求你承诺交付速度。",a:[{t:"签下大单",e:{cash:90000,energy:-18,reputation:5},m:"团队加班加点，最终漂亮完成订单。"},{t:"降低承诺",e:{cash:35000,reputation:3},m:"少赚一点，但给自己留出了安全空间。"},{t:"拒绝大单",e:{reputation:6,mood:3},m:"你选择不透支团队，长期口碑更重要。"}]},
+ {q:"一家媒体邀请你参加企业家圆桌论坛，现场会有很多潜在合作伙伴。",a:[{t:"盛装出席",e:{cash:-8000,fame:12,reputation:8},m:"你的发言获得掌声，还谈成了几个合作意向。"},{t:"派副总参加",e:{reputation:4,energy:3},m:"你省下时间，团队也获得了锻炼机会。"},{t:"拒绝邀请",e:{mood:2},m:"你决定专心处理手上的业务。"}]},
+ {q:"你发现公司采购价格长期偏高，供应商似乎和某位员工关系密切。",a:[{t:"彻查采购",e:{energy:-15,reputation:10,cash:randi(20000,100000)},m:"调查发现了漏洞，整改后每月都省下一笔钱。"},{t:"睁一只眼闭一只眼",e:{cash:30000,reputation:-12},m:"你暂时省了麻烦，但团队开始出现不满。"},{t:"更换供应商",e:{cash:-10000,reputation:8},m:"新供应商价格透明，长期合作更加稳健。"}]},
+ {q:"一位网红主动提出免费体验你的产品，并暗示可能帮你宣传。",a:[{t:"提供顶配体验",e:{cash:-12000,fame:18},m:"视频意外爆火，产品搜索量暴涨。"},{t:"普通体验即可",e:{cash:-3000,fame:8},m:"宣传效果不错，成本也控制住了。"},{t:"不接受免费宣传",e:{reputation:4},m:"你坚持按商业规则办事。"}]},
+ {q:"你在高铁上偶遇一位大型企业采购负责人，他正在寻找新供应商。",a:[{t:"现场介绍公司",e:{cash:75000,reputation:7,energy:-8},m:"你抓住机会，拿到了试订单。"},{t:"交换联系方式",e:{reputation:3},m:"先留下联系方式，后续慢慢谈。"},{t:"趁机推销到底",e:{cash:randi(-10000,120000),fame:3},m:"推销过猛，但最终还是谈出了一点结果。"}]},
+ {q:"公司团建预算突然多出一笔，你可以把钱用于团队活动。",a:[{t:"豪华团建",e:{cash:-25000,mood:12,reputation:8},m:"员工玩得很开心，第二天工作效率明显提升。"},{t:"发成奖金",e:{cash:-25000,mood:15,reputation:10},m:"现金奖励简单直接，大家都很满意。"},{t:"留下备用",e:{cash:20000},m:"你决定给公司留一笔安全垫。"}]},
+ {q:"你收到一个看起来很诱人的海外扩张机会，但需要先投入资金。",a:[{t:"大胆出海",e:{cash:randi(-120000,350000),fame:12,reputation:4},m:"海外市场给了你一个意外惊喜。"},{t:"先做市场调查",e:{cash:-15000,energy:-12,reputation:6},m:"调查后你避开了几个明显的坑。"},{t:"暂时不扩张",e:{mood:2},m:"稳住国内基本盘，你认为更重要。"}]},
+ {q:"你的一名员工在社交平台上意外爆红，网友开始关注你的公司。",a:[{t:"顺势打造个人IP",e:{cash:-15000,fame:25,reputation:5},m:"员工成为品牌代言人，公司获得大量曝光。"},{t:"保持低调",e:{fame:8,reputation:3},m:"不炒作，让热度自然发展。"},{t:"给员工奖金",e:{cash:-10000,mood:8,reputation:10},m:"员工感受到认可，团队凝聚力提升。"}]},
+ {q:"你参加一个慈善晚宴，拍卖会上出现了一件极具收藏价值的艺术品。",a:[{t:"高价拿下",e:{cash:-60000,mood:15,fame:12},m:"收藏品成为晚宴焦点，你也赚足了名气。"},{t:"理性旁观",e:{reputation:4,mood:2},m:"你没有冲动消费。"},{t:"匿名捐款",e:{cash:-25000,reputation:18,fame:6},m:"你的善意没有公开，但圈内人记住了你。"}]},
+ {q:"一家老字号企业邀请你入股，他们拥有很好的品牌，但经营效率偏低。",a:[{t:"入股改造",e:{cash:randi(-50000,250000),reputation:8},m:"改革阵痛之后，企业重新焕发生机。"},{t:"只做财务投资",e:{cash:randi(-30000,120000)},m:"你不参与管理，收益和风险都比较随机。"},{t:"放弃投资",e:{mood:2},m:"你决定把精力留给自己的核心业务。"}]},
+ {q:"凌晨两点，财务总监告诉你发现了一笔异常支出，需要你马上决定。",a:[{t:"立即调查",e:{energy:-10,reputation:10,cash:randi(10000,90000)},m:"异常支出被追回，公司财务制度也得到完善。"},{t:"明天再处理",e:{mood:-2},m:"你决定休息，明早再做判断。"},{t:"暂时冻结相关账户",e:{cash:-5000,reputation:6},m:"先控制风险，随后再慢慢调查。"}]},
+ {q:"你的公司收到一封神秘邀请：参加一场只有企业家才能进入的私人闭门会。",a:[{t:"接受邀请",e:{fame:10,reputation:12,energy:-8},m:"你认识了几位关键人物，未来可能带来巨大机会。"},{t:"让合伙人代你去",e:{reputation:5},m:"你把机会交给团队，收获了一些有价值的信息。"},{t:"拒绝神秘邀请",e:{mood:3},m:"未知的圈子不一定适合你。"}]},
+ {q:"你发现最近员工加班严重，虽然业绩上涨，但士气正在下降。",a:[{t:"减少加班",e:{cash:-20000,mood:10,reputation:8,energy:5},m:"短期收入下降，但团队状态明显改善。"},{t:"继续冲刺",e:{cash:60000,mood:-12,reputation:-8},m:"业绩继续上涨，但员工开始抱怨。"},{t:"发放加班奖金",e:{cash:-30000,mood:8,reputation:6},m:"钱能解决一部分问题，团队暂时稳住了。"}]},
+ {q:"你在社交场合被邀请与一家竞争对手共同举办商业活动。",a:[{t:"合作办活动",e:{cash:-12000,fame:15,reputation:10},m:"竞争对手变成合作伙伴，活动获得巨大关注。"},{t:"礼貌拒绝",e:{reputation:3},m:"你决定保持竞争关系。"},{t:"提出联合促销",e:{cash:30000,fame:10,reputation:6},m:"双方各取所长，意外获得不错的销量。"}]},
+ {q:"公司突然获得一项行业大奖提名，但需要支付一笔评审及展示费用。",a:[{t:"争取大奖",e:{cash:-18000,fame:18,reputation:12},m:"最终拿下奖项，公司品牌价值上涨。"},{t:"不花钱买曝光",e:{reputation:3},m:"你认为真正的实力不需要奖杯证明。"},{t:"借此举办发布会",e:{cash:-30000,fame:25,reputation:8},m:"奖项提名变成了一场成功的品牌发布会。"}]}
+];
+function randomEvent(manual=false){
+  if(!S||busy())return false;
+  let candidates=RANDOM_EVENTS.map((d,i)=>({d,i})).filter(x=>!recentRandomEvents.includes(x.i));
+  if(!candidates.length){recentRandomEvents=[];candidates=RANDOM_EVENTS.map((d,i)=>({d,i}));}
+  const pickOne=pick(candidates); const d=pickOne.d; recentRandomEvents.push(pickOne.i); if(recentRandomEvents.length>8)recentRandomEvents.shift();
+  openModal({title:"🎲 "+(manual?"随机事件":"突发事件"),body:d.q,choices:d.a.map(o=>({label:o.t,onClick:()=>{const r=delta(o.e);logEvent("随机事件 → "+o.t);toast(o.m+(r?"<br><small>"+r+"</small>":""),3200);closeModal();renderBiz();}}))});
+  return true;
+}
+function scheduleRandomEvents(){
+  clearTimeout(eventTimer);
+  if(!S||!S.settings)return;
+  const sec=Number(S.settings.randomEventSec);
+  if(!Number.isFinite(sec)||sec<=0)return;
+  eventTimer=setTimeout(()=>{randomEvent();scheduleRandomEvents();},clamp(sec*1000,1000,3600000));
+}
+
+function doDecision(){
+  if(S.energy<10)return;
+  S.energy=clamp(S.energy-10,0,100);
+  const d=pick(DECISIONS);
+  openModal({title:"💡 商业决策",body:d.q,
+    choices:d.a.map(opt=>({label:opt.t,onClick:()=>{
+      const r=delta(opt.e);S.decisionsMade++;unlock("first_deal");
+      logEvent("决策 → "+opt.t);closeModal();
+      setTimeout(()=>toast(opt.m+(r?"<br><small>"+r+"</small>":"")),200);renderBiz();
+    }}))});
+}
+
+let marketTab="stocks";
+function renderMarket(){
+  $("#v-market").innerHTML=hudBar()+`
+    <div class="seg2">
+      <button data-t="stocks" class="${marketTab==='stocks'?'on':''}">📈 股市</button>
+      <button data-t="acquire" class="${marketTab==='acquire'?'on':''}">🏢 收购公司</button>
+    </div><div id="marketBody"></div>`;
+  $$("#v-market .seg2 button").forEach(b=>b.onclick=()=>{marketTab=b.dataset.t;renderMarket();});
+  marketTab==="stocks"?renderStocks():renderAcquire();
+}
+function renderStocks(){
+  const body=$("#marketBody");
+  const summary=stockPortfolioSummary();
+  body.innerHTML=`<div class="muted" style="margin:0 2px 10px">股价每5秒波动，买入会扣除现金，卖出会回款；持仓成本会用于计算真实已实现/未实现盈亏。⚠️迷因狗币风险极高。</div>
+   <div class="card">
+     <div class="row"><span class="muted">持仓成本</span><b>${money(summary.invested)}</b></div>
+     <div class="row"><span class="muted">当前市值</span><b>${money(summary.value)}</b></div>
+     <div class="row"><span class="muted">浮动盈亏</span><b class="${summary.profit>=0?'pos':'neg'}">${summary.profit>=0?"+":""}${money(summary.profit)}</b></div>
+   </div>`+
+   STOCKS.map(st=>{
+    const held=S.portfolio[st.id]||0;
+    const basis=S.stockCost[st.id]||0;
+    const avg=held?basis/held:0;
+    const pnl=held*st.price-basis;
+    const dir=st._last?(st.price>=st._last?"price-up":"price-down"):"";
+    const arrow=st._last?(st.price>=st._last?"▲":"▼"):"";
+    return `<div class="list-item" style="cursor:default">
+      <div class="avatar">${st.emoji}</div>
+      <div class="li-main"><div class="n">${st.name} <span class="tag">${st.id}</span></div>
+        <div class="s">持有 ${held} 股 · 市值 ${money(held*st.price)}</div>
+        ${held?`<div class="s">成本 ${money(basis)} · 均价 ${money(avg)} · <span class="${pnl>=0?'pos':'neg'}">${pnl>=0?"+":""}${money(pnl)}</span></div>`:"<div class='s'>暂无持仓</div>"}</div>
+      <div style="text-align:right">
+        <div class="${dir}" style="font-weight:700">$${st.price.toFixed(2)} ${arrow}</div>
+        <div style="margin-top:5px;display:flex;gap:4px">
+          <button class="btn sm green" data-buy="${st.id}" ${S.cash<st.price?"disabled":""}>买</button>
+          <button class="btn sm red" data-sell="${st.id}" ${held?"":"disabled"}>卖</button>
+        </div></div></div>`;
+  }).join("");
+  $$("[data-buy]",body).forEach(b=>b.onclick=()=>tradeModal(b.dataset.buy,"buy"));
+  $$("[data-sell]",body).forEach(b=>b.onclick=()=>tradeModal(b.dataset.sell,"sell"));
+}
+function tradeModal(id,side){
+  const st=STOCKS.find(x=>x.id===id);
+  const held=S.portfolio[id]||0;
+  const costBasis=S.stockCost[id]||0;
+  const avgCost=held>0?costBasis/held:0;
+  const maxBuy=Math.max(0,Math.floor(S.cash/st.price));
+  openModal({
+    title:(side==="buy"?"买入 ":"卖出 ")+st.emoji+st.name,
+    body:`当前价 $${st.price.toFixed(2)} ｜ ${side==="buy"?"最多可买 "+maxBuy+" 股":"持有 "+held+" 股"}`,
+    html:`<div class="card" style="margin-bottom:10px;padding:10px">
+      <div class="row"><span class="muted">持仓均价</span><b>${held?money(avgCost):"—"}</b></div>
+      <div class="row"><span class="muted">当前浮动盈亏</span><b class="${held*st.price-costBasis>=0?'pos':'neg'}">${held?money(held*st.price-costBasis):"—"}</b></div>
+    </div>
+    <input id="qty" type="number" min="1" value="${side==='buy'?Math.min(10,maxBuy||1):Math.min(10,held)}"
+      style="width:100%;padding:12px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);color:#fff;font-size:16px;text-align:center;margin-bottom:10px"/>
+    <div style="display:flex;gap:6px">${[10,50,100].map(q=>`<button class="btn ghost sm" data-q="${q}" style="flex:1">${q}</button>`).join("")}<button class="btn ghost sm" data-q="max" style="flex:1">全部</button></div>`,
+    choices:[
+      {label:(side==="buy"?"确认买入":"确认卖出"),onClick:()=>{
+        const q=parseInt($("#qty").value)||0;
+        if(q<=0)return toast("请输入有效股数");
+        if(side==="buy"){
+          if(q>maxBuy)return toast("💸 现金不足");
+          const cost=q*st.price;
+          S.cash-=cost;
+          S.portfolio[id]=held+q;
+          S.stockCost[id]=(S.stockCost[id]||0)+cost;
+          logEvent(`买入 ${st.name} ${q}股，成本 ${money(cost)}`);
+          toast("✅ 买入 "+q+" 股，扣除 "+money(cost));
+        }else{
+          if(q>held)return toast("持股不足");
+          const gain=q*st.price;
+          const avg=costBasis/held;
+          const soldCost=avg*q;
+          const profit=gain-soldCost;
+          S.cash+=gain;
+          S.portfolio[id]=held-q;
+          S.stockCost[id]=Math.max(0,costBasis-soldCost);
+          if(S.portfolio[id]<=0){
+            delete S.portfolio[id];
+            delete S.stockCost[id];
+          }
+          if(profit>=100000)unlock("stock_win");
+          logEvent(`卖出 ${st.name} ${q}股，回款 ${money(gain)}，${profit>=0?"盈利":"亏损"} ${money(Math.abs(profit))}`);
+          toast(`✅ 卖出 ${q} 股，回款 ${money(gain)}<br><small class="${profit>=0?'pos':'neg'}">${profit>=0?"盈利 ":"亏损 "}${money(Math.abs(profit))}</small>`);
+        }
+        save();
+        closeModal();
+        renderStocks();
+        refreshHUD();
+      }},
+      {label:"取消",onClick:closeModal}
+    ]
+  });
+  setTimeout(()=>$$("[data-q]").forEach(b=>b.onclick=()=>{
+    $("#qty").value=b.dataset.q==="max"?(side==="buy"?maxBuy:held):Math.min(parseInt(b.dataset.q),side==="buy"?maxBuy:held);
+  }),30);
+}
+
+function stockPortfolioSummary(){
+  let invested=0,value=0;
+  for(const id in S.portfolio){
+    const st=STOCKS.find(x=>x.id===id);
+    if(!st)continue;
+    invested+=S.stockCost[id]||0;
+    value+=st.price*(S.portfolio[id]||0);
+  }
+  return {invested,value,profit:value-invested};
+}
+
+function renderAcquire(){
+  const body=$("#marketBody");
+  body.innerHTML=`<div class="muted" style="margin:0 2px 10px">收购公司获得稳定被动收入。</div>`+
+   ACQUIRE.map(c=>{const owned=S.companies[c.id];
+    return `<div class="list-item" style="cursor:default"><div class="avatar">${c.emoji}</div>
+      <div class="li-main"><div class="n">${c.name} ${owned?'<span class="tag" style="color:var(--green)">已持有</span>':""}</div>
+        <div class="s">${c.desc}</div><div class="s pos">+${money(c.income)}/天</div></div>
+      <div style="text-align:right"><div style="font-weight:700;font-size:12px">${money(c.price)}</div>
+        <button class="btn sm ${owned?'ghost':'green'}" data-acq="${c.id}" ${owned?"disabled":""} style="margin-top:5px">${owned?"已收购":"收购"}</button></div></div>`;
+  }).join("");
+  $$("[data-acq]",body).forEach(b=>b.onclick=()=>{
+    const c=ACQUIRE.find(x=>x.id===b.dataset.acq);
+    if(S.cash<c.price)return toast("💸 现金不足，差 "+money(c.price-S.cash));
+    openModal({title:"确认收购",body:`花费 ${money(c.price)} 收购「${c.name}」？每天带来 ${money(c.income)} 被动收入。`,
+      choices:[{label:"确认收购",onClick:()=>{S.cash-=c.price;S.companies[c.id]=true;unlock("first_company");toast("🎉 成功收购「"+c.name+"」！");logEvent("收购了「"+c.name+"」");delta({});closeModal();renderAcquire();}},{label:"再想想",onClick:closeModal}]});
+  });
+}
+
+function renderTeam(){
+  const inc=passiveIncome();
+  $("#v-team").innerHTML=hudBar()+`
+    <h2 class="sec">👥 团队管理</h2>
+    <div class="card">
+      <div class="row"><span class="muted">团队规模</span><b>${S.team.length} 人</b></div>
+      <div class="row"><span class="muted">每日工资</span><b class="neg">-${money(S.team.reduce((a,t)=>a+t.salary,0))}/天</b></div>
+      <div class="row"><span class="muted">被动收入</span><b class="pos">${money(inc)}/天</b></div>
+    </div>
+    <h2 class="sec">📋 我的团队</h2>
+    ${S.team.length?S.team.map((t,i)=>`<div class="list-item" style="cursor:default"><div class="avatar">${t.emoji}</div>
+      <div class="li-main"><div class="n">${t.role}</div><div class="s">${t.desc} · ${money(t.salary)}/天</div></div>
+      <button class="btn sm red" data-fire="${i}">辞退</button></div>`).join(""):'<div class="center-empty">还没有员工</div>'}
+    <h2 class="sec">🎯 人才市场</h2>
+    ${STAFF_POOL.map(s=>{const hired=S.team.filter(t=>t.role===s.role).length;
+      return `<div class="list-item" style="cursor:default"><div class="avatar">${s.emoji}</div>
+        <div class="li-main"><div class="n">${s.role} ${hired?`<span class="tag">已雇${hired}</span>`:""}</div><div class="s">${s.desc}</div><div class="s">${money(s.salary)}/天</div></div>
+        <div style="text-align:right"><div style="font-size:12px;font-weight:700">${money(s.cost)}</div>
+        <button class="btn sm green" data-hire="${s.role}" style="margin-top:5px">招聘</button></div></div>`;}).join("")}`;
+  $$("[data-hire]").forEach(b=>b.onclick=()=>{const s=STAFF_POOL.find(x=>x.role===b.dataset.hire);if(S.cash<s.cost)return toast("💸 招聘费不足");S.cash-=s.cost;S.team.push({...s});toast("🤝 "+s.role+" 已入职！");logEvent("雇佣了 "+s.role);delta({});renderTeam();});
+  $$("[data-fire]").forEach(b=>b.onclick=()=>{const i=+b.dataset.fire;const t=S.team[i];S.team.splice(i,1);toast("👋 已辞退 "+t.role);delta({});renderTeam();});
+}
+
+function renderShop(){
+  $("#v-shop").innerHTML=hudBar()+`
+    <h2 class="sec">🛍️ 奢侈品商城</h2>
+    <div class="muted" style="margin:0 2px 10px">买买买提升心情和名气。</div>
+    ${SHOP.map(it=>{const owned=S.inventory.includes(it.id);
+      return `<div class="list-item" style="cursor:default"><div class="avatar" style="font-size:26px">${it.emoji}</div>
+        <div class="li-main"><div class="n">${it.name} ${owned?'<span class="tag" style="color:var(--gold)">已拥有</span>':""}</div>
+          <div class="s">😀+${it.mood} ⭐名气+${it.fame}</div></div>
+        <div style="text-align:right"><div style="font-size:12px;font-weight:700">${money(it.price)}</div>
+        <button class="btn sm ${owned?'ghost':''}" data-buy="${it.id}" ${owned?"disabled":""} style="margin-top:5px">${owned?"已购":"购买"}</button></div></div>`;}).join("")}`;
+  $$("[data-buy]",$("#v-shop")).forEach(b=>b.onclick=()=>{
+    const it=SHOP.find(x=>x.id===b.dataset.buy);
+    if(S.cash<it.price)return toast("💸 钱不够，先去赚钱吧");
+    S.cash-=it.price;S.inventory.push(it.id);delta({mood:it.mood,fame:it.fame});
+    toast("🎁 购入「"+it.name+"」！"+pick(["真有品味","壕无人性","这很总裁"]));logEvent("购买了「"+it.name+"」");
+    if(it.id==="car")unlock("buy_car");if(it.id==="jet")unlock("buy_jet");if(it.special==="star")unlock("richest");
+    renderShop();
+  });
+}
+
+let wbImage=null;
+function renderSocial(){
+  $("#v-social").innerHTML=hudBar()+`
+    <h2 class="sec">🔥 热搜 · 围脖</h2>
+    <div class="card">
+      <div class="row" style="margin-bottom:8px"><span class="muted">名气 ${S.fame}🔥 · ${influenceLabel()}</span></div>
+      <textarea class="wb" id="wbText" placeholder="分享点什么...（说说今天又赚了多少）"></textarea>
+      <div id="wbImgWrap"></div>
+      <div class="imgpick" id="wbImgPick">${IMG_OPTIONS.map(e=>`<button data-img="${e}">${e}</button>`).join("")}</div>
+      <div class="row" style="margin-top:10px">
+        <span class="muted" id="wbImgTip">点表情当配图（可选）</span>
+        <button class="btn sm" id="wbPost">发布 🚀</button>
+      </div>
+    </div>
+    <h2 class="sec">📰 热搜广场</h2>
+    <div id="wbFeed"></div>`;
+  renderImgWrap();renderFeed();
+  $("#wbImgPick").querySelectorAll("[data-img]").forEach(b=>b.onclick=()=>{
+    wbImage=wbImage===b.dataset.img?null:b.dataset.img;
+    $$("#wbImgPick [data-img]").forEach(x=>x.classList.toggle("on",x.dataset.img===wbImage));
+    renderImgWrap();
+  });
+  $("#wbPost").onclick=doPost;
+}
+function renderImgWrap(){
+  const w=$("#wbImgWrap");if(!w)return;
+  w.innerHTML=wbImage?`<div class="imgbox" style="background:linear-gradient(135deg,#2a2a3a,#15151f)">${wbImage}</div>`:"";
+}
+function renderFeed(){
+  const f=$("#wbFeed");if(!f)return;
+  if(!S.social.length){f.innerHTML='<div class="center-empty">还没有动态，发第一条吧</div>';return;}
+  f.innerHTML=S.social.slice(0,30).map(p=>`
+    <div class="wb-post">
+      <div class="avatar">${p.avatar||"🤵"}</div>
+      <div class="li-main">
+        <div class="n">${esc(p.author)} ${p.vip?'<span class="tag" style="color:var(--gold)">V</span>':""}</div>
+        <div class="h">${p.time||("第"+p.day+"天")}</div>
+        <div style="margin:6px 0;font-size:14px">${esc(p.text)}</div>
+        ${p.img?`<div class="imgbox" style="background:linear-gradient(135deg,#2a2a3a,#15151f)">${p.img}</div>`:""}
+        <div class="muted" style="margin-top:6px">👍 ${p.likes.toLocaleString()} 💬 ${p.comments} 🔁 ${p.reposts||0} ${p.hot?'<span class="tag" style="color:var(--red)">🔥热搜</span>':""}</div>
+      </div>
+    </div>`).join("");
+}
+function influenceLabel(){
+  if(S.fame>=200)return "🌍 世界级";
+  if(S.fame>=100)return "🇨🇳 全国知名";
+  if(S.fame>=50)return "📢 小有名气";
+  if(S.fame>=20)return "🌱 崭露头角";
+  return "😶 查无此人";
+}
+function doPost(){
+  const t=($("#wbText").value||"").trim();
+  if(!t&&!wbImage)return toast("写点东西或选张配图吧");
+  const base=Math.max(S.fame,5)*rand(200,1500);
+  const viral=Math.random()<clamp(S.fame/300,.05,.6);
+  const likes=Math.round(viral?base*rand(50,300):base*rand(1,8));
+  S.social.unshift({author:S.name,avatar:playerAvatar(),vip:S.fame>=50,text:t||"[图片]",img:wbImage,
+    time:fmtRealTime(),day:currentDay(),likes,comments:Math.round(likes*rand(.02,.1)),reposts:Math.round(likes*rand(.01,.05)),hot:likes>=1000000});
+  wbImage=null;
+  if(likes>=1000000){unlock("viral");delta({fame:15,reputation:5,mood:8});toast("🔥 冲上热搜第一！点赞破百万！");}
+  else{delta({fame:randi(2,6),mood:3});toast("📱 已发布，收获 "+likes.toLocaleString()+" 赞");}
+  renderSocial();
+}
+
+function ensureChat(id){if(!S.chats[id])S.chats[id]=[];return S.chats[id];}
+function renderMsg(){
+  const groups=[["tycoon","💼 商业大佬"],["star","🌟 明星名流"],["family","👪 家人"],["friend","🧑‍🤝‍🧑 朋友"]];
+  $("#v-msg").innerHTML=hudBar()+`<h2 class="sec">💬 信息</h2>`+
+    groups.map(([cat,title])=>`<div class="muted" style="margin:6px 2px">${title}</div>`+
+      CONTACTS.filter(c=>c.cat===cat).map(c=>{
+        const chat=S.chats[c.id]||[];const last=chat[chat.length-1];
+        const unread=chat.filter(m=>m.unread).length;
+        return `<div class="list-item" data-chat="${c.id}"><div class="avatar">${c.emoji}</div>
+          <div class="li-main"><div class="n">${c.name} <span class="muted" style="font-weight:400">${c.role}</span></div>
+          <div class="s">${last?(last.from==="me"?"你: ":"")+esc(last.text):"点击开始聊天"}</div></div>
+          ${unread?`<span class="badge" style="position:static">${unread}</span>`:""}</div>`;
+      }).join("")).join("");
+  $$("[data-chat]").forEach(el=>el.onclick=()=>openChat(el.dataset.chat));
+}
+function openChat(id){
+  const c=cById(id);const chat=ensureChat(id);
+  activeChatId=id;
+  chat.forEach(m=>m.unread=false);save();updateBadges();
+  const quicks=[...QUICK_REPLIES].sort(()=>Math.random()-.5).slice(0,3);
+  openModal({title:c.emoji+" "+c.name,
+    modalClass:"chat-modal",
+    html:`<div class="chat-modal-body">
+      <div class="chat-wrap" id="chatWrap" style="margin-bottom:6px">
+        ${chat.length?chat.map(m=>`<div class="msg-bubble ${m.from==="me"?"msg-out":"msg-in"}">${esc(m.text)}</div>`).join(""):`<div class="center-empty">和 ${c.name} 打个招呼吧</div>`}
+      </div>
+      <div class="quick">${quicks.map(q=>`<button data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div>
+      <div class="inbar"><input id="chatIn" placeholder="输入消息..." maxlength="60"/><button class="btn sm" id="chatSend">发送</button></div>
+    </div>`,
+    choices:[{label:"关闭",onClick:closeModal}]});
+  const send=(text)=>{
+    text=(text||"").trim();if(!text)return;
+    chat.push({from:"me",text,unread:false});save();
+    reopenChatScroll(id);
+    setTimeout(()=>{
+      chat.push({from:"them",text:vars(pick(c.replies)),unread:false});save();
+      if(activeChatId===id && $("#overlay").classList.contains("show"))reopenChatScroll(id);
+    },randi(600,1200));
+  };
+  setTimeout(()=>{
+    $$("#modal .quick button").forEach(b=>b.onclick=()=>send(b.dataset.q));
+    const inp=$("#chatIn");
+    $("#chatSend").onclick=()=>{send(inp.value);inp.value="";};
+    inp.onkeydown=e=>{if(e.key==="Enter"){send(inp.value);inp.value="";}};
+    scrollChat();
+  },30);
+}
+function reopenChatScroll(id){
+  if(activeChatId!==id)return;
+  const c=cById(id);const chat=S.chats[id];
+  const wrap=$("#chatWrap");if(!wrap)return;
+  wrap.innerHTML=chat.map(m=>`<div class="msg-bubble ${m.from==="me"?"msg-out":"msg-in"}">${esc(m.text)}</div>`).join("");
+  scrollChat();
+}
+function scrollChat(){const w=$("#chatWrap");if(w)w.scrollTop=w.scrollHeight;}
+
+function renderPhone(){
+  const groups=[["tycoon","💼 商业大佬"],["star","🌟 明星名流"],["family","👪 家人"],["friend","🧑‍🤝‍🧑 朋友"]];
+  $("#v-phone").innerHTML=hudBar()+`<h2 class="sec">📞 电话</h2>
+    <div class="muted" style="margin:0 2px 10px">点任意联系人即可拨打，进入仿真通话。</div>`+
+    groups.map(([cat,title])=>`<div class="muted" style="margin:6px 2px">${title}</div>`+
+      CONTACTS.filter(c=>c.cat===cat).map(c=>`<div class="list-item" data-dial="${c.id}">
+        <div class="avatar">${c.emoji}</div>
+        <div class="li-main"><div class="n">${c.name}</div><div class="s">${c.role}</div></div>
+        <div style="font-size:20px;color:var(--green)">📞</div></div>`).join("")).join("");
+  $$("[data-dial]").forEach(el=>el.onclick=()=>startOutgoing(el.dataset.dial));
+}
+
+function busy(){return $("#call").classList.contains("show")||$("#overlay").classList.contains("show");}
+function startOutgoing(id){
+  const c=cById(id);callState={c,convo:[],incoming:false};
+  const el=$("#call");el.className="show";
+  el.innerHTML=`
+    <div class="who">${c.name}</div><div class="role">${c.role}</div>
+    <div class="status" id="callStatus">拨号中…</div>
+    <div class="big">${c.emoji}</div>
+    <div class="actions"><button class="call-btn hang" id="hangup">📵</button></div>`;
+  $("#hangup").onclick=endCall;
+  setTimeout(()=>{if(callState&&callState.c.id===id){callState.convo.push({from:"them",text:vars(pick(c.open))});talking();}},1300);
+}
+function incomingCall(){
+  const c=pick(CONTACTS);callState={c,convo:[],incoming:true};
+  const el=$("#call");el.className="show ringing";
+  el.innerHTML=`
+    <div class="who">${c.name}</div><div class="role">${c.role} · 来电</div>
+    <div class="status">📳 正在响铃…</div>
+    <div class="big">${c.emoji}</div>
+    <div class="actions">
+      <button class="call-btn dec" id="decline">📵</button>
+      <button class="call-btn acc" id="accept">📞</button></div>`;
+  $("#decline").onclick=()=>{endCall();delta({mood:-1});toast("📵 你挂断了 "+c.name);};
+  $("#accept").onclick=()=>{callState.convo.push({from:"them",text:vars(pick(c.open))});talking();};
+}
+function talking(){
+  const {c}=callState;
+  if(["star","tycoon"].includes(c.cat))unlock("call_star");
+  const el=$("#call");el.className="show";
+  const quicks=[...QUICK_REPLIES].sort(()=>Math.random()-.5).slice(0,3);
+  el.innerHTML=`
+    <div class="who">${c.name}</div><div class="role">${c.role}</div>
+    <div class="status">📞 通话中…</div>
+    <div class="big" style="width:70px;height:70px;font-size:36px;margin:10px auto">${c.emoji}</div>
+    <div id="callLog"></div>
+    <div id="callReply">
+      <div class="quick">${quicks.map(q=>`<button data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div>
+      <div class="inbar"><input id="callIn" placeholder="说点什么..." maxlength="60"/><button class="btn sm" id="callSend">说</button></div>
+    </div>
+    <div class="actions"><button class="call-btn hang" id="hangup">📵</button></div>`;
+  drawCallLog();
+  const say=(text)=>{
+    text=(text||"").trim();if(!text||!callState)return;
+    callState.convo.push({from:"me",text});drawCallLog();
+    const cc=callState.c;
+    setTimeout(()=>{if(callState&&callState.c.id===cc.id){callState.convo.push({from:"them",text:vars(pick(cc.replies))});drawCallLog();}},randi(800,1400));
+  };
+  $$("#callReply .quick button").forEach(b=>b.onclick=()=>say(b.dataset.q));
+  const inp=$("#callIn");
+  $("#callSend").onclick=()=>{say(inp.value);inp.value="";};
+  inp.onkeydown=e=>{if(e.key==="Enter"){say(inp.value);inp.value="";}};
+  $("#hangup").onclick=endCall;
+}
+function drawCallLog(){
+  const log=$("#callLog");if(!log||!callState)return;
+  log.innerHTML=`<div class="chat-wrap">`+callState.convo.map(m=>`<div class="msg-bubble ${m.from==="me"?"msg-out":"msg-in"}">${esc(m.text)}</div>`).join("")+`</div>`;
+  log.scrollTop=log.scrollHeight;
+}
+function endCall(){
+  if(callState&&callState.convo.length){
+    const chat=ensureChat(callState.c.id);
+    callState.convo.forEach(m=>chat.push({from:m.from,text:m.text,unread:false}));
+    save();
+  }
+  callState=null;$("#call").className="";$("#call").innerHTML="";updateBadges();
+}
+
+function incomingSMS(){
+  const c=pick(CONTACTS);const chat=ensureChat(c.id);
+  const text=vars(pick(c.open));
+  chat.push({from:"them",text,unread:true});save();
+  if(S.settings.notify)toast(`💬 <b>${c.name}</b>：${esc(text.slice(0,20))}${text.length>20?"…":""}`,3000);
+  updateBadges();
+  // 只刷新当前打开的联系人聊天窗口，避免其他联系人新短信串入当前页面。
+  if($("#overlay").classList.contains("show") && activeChatId===c.id)reopenChatScroll(c.id);
+}
+
+function renderAch(){
+  const got=S.achievements.length;
+  $("#v-ach").innerHTML=hudBar()+`
+    <h2 class="sec">🏆 成就 (${got}/${ACHS.length})</h2>
+    ${ACHS.map(a=>{const on=S.achievements.includes(a.id);
+      return `<div class="ach ${on?"":"locked"}"><div class="ico">${a.ico}</div>
+        <div class="li-main"><div class="n">${a.name} ${on?'<span class="tag" style="color:var(--gold)">已达成</span>':""}</div><div class="s">${a.desc}</div></div></div>`;}).join("")}
+    <h2 class="sec">🎖️ 我的称号</h2>
+    <div class="card">${TITLES.map(t=>{const on=S.titles.includes(t.t);
+      return `<div class="row" style="padding:5px 0;${on?"":"opacity:.4"}"><span>${t.t}</span>
+        <button class="btn sm ${S.activeTitle===t.t?"":"ghost"}" data-title="${t.t}" ${on?"":"disabled"}>${S.activeTitle===t.t?"使用中":"佩戴"}</button></div>`;}).join("")}</div>`;
+  $$("[data-title]").forEach(b=>b.onclick=()=>{S.activeTitle=b.dataset.title;toast("🎖️ 已佩戴："+b.dataset.title);save();renderAch();});
+}
+
+function renderSettings(){
+  $("#v-settings").innerHTML=hudBar()+`
+    <h2 class="sec">⚙️ 设置</h2>
+    <div class="card">
+      <h3>📞 来电频率</h3>
+      <p class="muted">每隔多少秒可能来一通电话（越小越频繁）</p>
+      <div class="inbar"><input id="setCall" type="number" min="1" max="600" value="${S.settings.callSec}"/><span class="muted" style="align-self:center">秒</span></div>
+    </div>
+    <div class="card">
+      <h3>💬 短信频率</h3>
+      <p class="muted">每隔多少秒可能来一条短信</p>
+      <div class="inbar"><input id="setSms" type="number" min="1" max="600" value="${S.settings.smsSec}"/><span class="muted" style="align-self:center">秒</span></div>
+    </div>
+    <div class="card">
+      <h3>🎲 随机事件频率</h3>
+      <p class="muted">随机事件会以弹窗形式出现。默认每 10 秒一次，也可以关闭。</p>
+      <div class="seg2" id="eventFreqPick" style="margin-top:8px;margin-bottom:0">
+        ${[[0,"关闭"],[5,"5秒"],[10,"10秒"],[20,"20秒"],[30,"30秒"],[60,"60秒"]].map(([v,t])=>`<button data-event-sec="${v}" class="${Number(S.settings.randomEventSec)===v?'on':''}">${t}</button>`).join("")}
+      </div>
+    </div>
+    <div class="card">
+      <div class="row"><span>🌙 免打扰模式</span>
+        <button class="btn sm ${S.settings.doNotDisturb?'green':'ghost'}" id="setDnd">${S.settings.doNotDisturb?"开":"关"}</button></div>
+      <p class="muted" style="margin-top:6px">开启后不会出现自动来电提示弹窗，但你仍然可以主动拨打电话；短信弹窗不受影响。</p>
+    </div>
+    <div class="card">
+      <div class="row"><span>🔔 短信弹窗提醒</span>
+        <button class="btn sm ${S.settings.notify?'green':'ghost'}" id="setNotify">${S.settings.notify?"开":"关"}</button></div>
+    </div>
+    <div class="card">
+      <button class="btn full" id="setSave">保存设置</button>
+    </div>`;
+  $$('[data-event-sec]').forEach(b=>b.onclick=()=>{S.settings.randomEventSec=+b.dataset.eventSec;save();scheduleRandomEvents();renderSettings();});
+  $("#setDnd").onclick=()=>{S.settings.doNotDisturb=!S.settings.doNotDisturb;save();renderSettings();};
+  $("#setNotify").onclick=()=>{S.settings.notify=!S.settings.notify;save();renderSettings();};
+  $("#setSave").onclick=()=>{
+    S.settings.callSec=clamp(parseInt($("#setCall").value)||10,1,600);
+    S.settings.smsSec=clamp(parseInt($("#setSms").value)||5,1,600);
+    save();scheduleCalls();scheduleSms();scheduleRandomEvents();toast("✅ 设置已保存");
+  };
+}
+
+function renderMe(){
+  const nw=netWorth();
+  $("#v-me").innerHTML=hudBar()+`
+    <h2 class="sec">👤 总裁档案</h2>
+    <div class="card">
+      <div style="text-align:center;padding:6px 0">
+        <div style="font-size:50px">${playerAvatar()}</div>
+        <div style="font-size:20px;font-weight:700;margin-top:4px">${esc(S.name)} ${honor()}</div>
+        <div class="muted">🎖️ ${S.activeTitle}</div>
+      </div>
+      <div class="row" style="margin-top:8px"><span class="muted">总资产（现金+股票+公司+物品）</span><b class="pos">${money(nw)}</b></div>
+      <div class="row"><span class="muted">健康</span><b>${S.health}/100</b></div>
+      <div class="row"><span class="muted">经营天数</span><b>第 ${currentDay()} 天</b></div>
+      <div class="row"><span class="muted">名下公司</span><b>${Object.values(S.companies).filter(Boolean).length} 家</b></div>
+    </div>
+    <h2 class="sec">🏅 福布斯排行榜</h2>
+    <div class="card">${leaderboardRank(nw)}</div>
+    <h2 class="sec">⚙️ 更多</h2>
+    <div class="card">
+      <button class="btn ghost full" id="goTeam" style="margin-bottom:8px">👥 团队管理</button>
+      <button class="btn ghost full" id="goShop" style="margin-bottom:8px">🛍️ 奢侈品商城</button>
+      <button class="btn ghost full" id="goBank" style="margin-bottom:8px">💳 银行卡</button>
+      <button class="btn ghost full" id="goEntertainment" style="margin-bottom:8px">🎮 娱乐</button>
+      <button class="btn ghost full" id="goSet" style="margin-bottom:8px">⚙️ 设置</button>
+      <button class="btn red full" id="resetBtn">🗑️ 重开人生（清空存档）</button>
+    </div>`;
+  $("#goTeam").onclick=()=>switchView("v-team");
+  $("#goShop").onclick=()=>switchView("v-shop");
+  $("#goBank").onclick=()=>switchView("v-bank");
+  $("#goEntertainment").onclick=()=>switchView("v-entertainment");
+  $("#goSet").onclick=()=>switchView("v-settings");
+  $("#resetBtn").onclick=()=>{if(confirm("确定清空存档、重开一局吗？")){localStorage.removeItem(SAVE_KEY);location.reload();}};
+}
+const LEADERBOARD=[
+  {n:"贝所思",nw:2.1e12},{n:"马思克",nw:1.8e12},{n:"神秘老钱",nw:9e11},
+  {n:"煤老板老赵",nw:4e11},{n:"盖饭",nw:1.2e11},{n:"王见林",nw:6e10},{n:"王思葱",nw:2e10}
+];
+function leaderboardRank(nw){
+  const all=[...LEADERBOARD,{n:S.name+"（你）",nw,me:true}].sort((a,b)=>b.nw-a.nw);
+  const idx=all.findIndex(x=>x.me);
+  return all.map((x,i)=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line);${x.me?"color:var(--gold);font-weight:700":""}">
+    <span>${i+1===1?"🥇":i+1===2?"🥈":i+1===3?"🥉":"#"+(i+1)} ${esc(x.n)}</span><span>${money(x.nw)}</span></div>`).join("")+
+    `<div class="muted" style="margin-top:8px">你排名第 ${idx+1} 位，加油冲榜！</div>`;
+}
+
+function moveStocks(){
+  STOCKS.forEach(st=>{st._last=st.price;let d=rand(-st.vol,st.vol);if(Math.random()<.03)d*=rand(2,5);st.price=Math.max(0.01,+(st.price*(1+d)).toFixed(2));});
+  if($("#v-market").classList.contains("active")&&marketTab==="stocks")renderStocks();
+}
+
+function openModal({title,body,html,choices,modalClass=""}){
+  const m=$("#modal");
+  m.className="modal"+(modalClass?" "+modalClass:"");
+  m.innerHTML=`<h3>${title||""}</h3>${body?`<p>${body}</p>`:""}${html||""}
+    <div class="choices">${(choices||[]).map((c,i)=>`<button class="choice" data-i="${i}">${c.label}</button>`).join("")}</div>`;
+  $("#overlay").classList.toggle("chat-open",modalClass==="chat-modal");
+  $("#overlay").classList.add("show");
+  $$(".choice",m).forEach((b,i)=>b.onclick=()=>choices[i].onClick&&choices[i].onClick());
+}
+function closeModal(){
+  $("#overlay").classList.remove("show","chat-open");
+  $("#modal").className="modal";
+  activeChatId=null;
+}
+
+function scheduleCalls(){
+  clearTimeout(callTimer);
+  callTimer=setTimeout(()=>{if(!busy()&&!S.settings.doNotDisturb)incomingCall();scheduleCalls();},clamp((S.settings.callSec||10)*1000,1000,600000));
+}
+function scheduleSms(){
+  clearTimeout(smsTimer);
+  smsTimer=setTimeout(()=>{incomingSMS();scheduleSms();},clamp((S.settings.smsSec||5)*1000,1000,600000));
+}
+
+function startGame(name,gender,diff){
+  S=newState(name,gender,diff);
+  S.social=[
+    {author:"马思克",avatar:"🚀",vip:true,text:"火星的房价还是太贵了，得再发几枚火箭。",img:"✈️",time:"刚刚",day:1,likes:2380000,comments:88000,reposts:41000,hot:true},
+    {author:"王思葱",avatar:"🐶",vip:true,text:"给我家狗又添了俩表，它现在比我还有品味。",img:"🐶",time:"1小时前",day:1,likes:990000,comments:52000,reposts:12000,hot:false},
+  ];
+  save();enterGame();
+  setTimeout(()=>toast("👋 欢迎你，"+S.name+" "+honor()+"！各路人马马上会联系你。",4000),500);
+}
+function enterGame(){
+  $("#start").style.display="none";
+  settleDays();refreshHUD();switchView("v-home");
+  clearInterval(clockTimer);clearInterval(stockTimer);
+  clockTimer=setInterval(()=>{
+    refreshHUD();
+    regenAcc++;
+    if(regenAcc%30===0){S.energy=clamp(S.energy+1,0,100);}
+    if(regenAcc%60===0){settleDays();}
+  },1000);
+  stockTimer=setInterval(moveStocks,5000);
+  scheduleCalls();scheduleSms();scheduleRandomEvents();
+}
+function boot(){
+  const saved=load();
+  let gender="male",diff="normal";
+  $$("#genderPick button").forEach(b=>b.onclick=()=>{$$("#genderPick button").forEach(x=>x.classList.remove("on"));b.classList.add("on");gender=b.dataset.g;});
+  $$(".diff button").forEach(b=>b.onclick=()=>{$$(".diff button").forEach(x=>x.classList.remove("on"));b.classList.add("on");diff=b.dataset.d;});
+  $("#startBtn").onclick=()=>startGame($("#nameInput").value.trim(),gender,diff);
+  if(saved){
+    $("#continueBtn").style.display="block";
+    $("#continueBtn").onclick=()=>{
+      normalizeLoadedState(saved);
+      enterGame();
+    };
+  }
+  $$("#nav button").forEach(b=>b.onclick=()=>switchView(b.dataset.nav));
+  $("#overlay").onclick=e=>{if(e.target.id==="overlay")closeModal();};
+  setInterval(()=>{$("#sbTime").textContent=fmtRealTime();},1000);
+  $("#sbTime").textContent=fmtRealTime();
+}
+boot();
+</script>
+</body>
+</html>
